@@ -44,6 +44,6 @@
   }
   "publish": {
     "provider": "github",
-    "owner": "Wagedesk-stack",
+    "owner": "ashley-chiteri",
     "repo": "wagedesk-frontend"
 }
