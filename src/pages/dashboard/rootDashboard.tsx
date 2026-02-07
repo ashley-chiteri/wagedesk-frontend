@@ -1,17 +1,68 @@
-import { Clock, Ban, Building2, PlusCircle, Mail, Plus } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  Clock,
+  Ban,
+  Building2,
+  PlusCircle,
+  Mail,
+  Plus,
+  SearchX,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import EmptyState from "@/components/common/emptyState";
 import { CompanyCard } from "@/components/dashboard/companyCard";
-import { Button } from "@/components/ui/button";
+import OfflineBanner from "@/components/common/offlinebanner";
+import { Input } from "@/components/ui/input";
 
 const RootDashboard = () => {
-  const {
-    activeWorkspace,
-    isWorkspacePending,
-    isWorkspaceSuspended,
-  } = useAuthStore();
+  const { activeWorkspace, isWorkspacePending, isWorkspaceSuspended, loading } =
+    useAuthStore();
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
-  // 1. No Workspace assigned at all
+  const companies = useMemo(() => {
+    return activeWorkspace?.workspaces?.companies || [];
+  }, [activeWorkspace]);
+
+  const filteredCompanies = useMemo(() => {
+    return companies.filter(
+      (company) =>
+        company.business_name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        company.industry?.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [companies, searchTerm]);
+
+if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center mb-6">
+          <div className="h-10 w-64 bg-gray-200 animate-pulse rounded-xl" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="h-40 bg-white/40 backdrop-blur-md border-white/40 animate-pulse rounded-xl">
+              <div className="p-4 space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded-full w-20 mt-6" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // No Workspace assigned at all
   if (!activeWorkspace) {
     return (
       <EmptyState
@@ -22,7 +73,7 @@ const RootDashboard = () => {
     );
   }
 
-  // 2. Workspace is Pending Review
+  // Workspace is Pending Review
   if (isWorkspacePending()) {
     return (
       <EmptyState
@@ -33,7 +84,6 @@ const RootDashboard = () => {
       />
     );
   }
-
   // 3. Workspace is Suspended
   if (isWorkspaceSuspended()) {
     return (
@@ -49,38 +99,62 @@ const RootDashboard = () => {
     );
   }
 
-  const companies = activeWorkspace.workspaces.companies || [];
-
-  // Show Empty State if no companies exist
-  if (companies.length === 0) {
+  if (companies.length === 0 ) {
     return (
-      <EmptyState
-        icon={PlusCircle}
-        title="Welcome to your Workspace"
-        description="You're all set! Now, let's create your first company to start managing your payroll."
-        actionLabel="Set up company"
-        onAction={() => console.log("Navigate to multi-step setup")}
-      />
-    );
+       <EmptyState
+                icon={PlusCircle}
+                title="Welcome to your Workspace"
+                description="Now, let's create your first company to start managing your payroll."
+                actionLabel="Set up company"
+                onAction={() => navigate("/company-setup")}
+            />
+    )
+
   }
 
-//Show Grid if companies exis
+  //Show Grid if companies exis
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Companies</h1>
-          <p className="text-muted-foreground"> Select a company to manage payroll and employees. </p>
-        </div>
-        <Button onClick={() => console.log("Add Company")} className="bg-[#1F3A8A]">
-          <Plus className="mr-2 h-4 w-4" /> Add Company
-        </Button>
+    <div className="container mx-auto px-4 py-6">
+      <OfflineBanner />
+      
+      <div className="flex items-center mb-6">
+        <Input
+          placeholder="Search for company"
+          className="max-w-xs h-10 bg-white/60 backdrop-blur-md border-white/20 shadow-sm focus:ring-purple-500 rounded-md px-4"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {/*add compny Card */}
+          <Link to={"/company-setup"}>
+           <Card className="group relative overflow-hidden h-40 bg-white/40 backdrop-blur-lg border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-white/60 transition-all duration-300 rounded-xl flex items-center justify-center">
+            <CardContent className="flex flex-col items-center p-0">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600 group-hover:scale-110 transition-transform">
+                <Plus className="h-6 w-6" />
+              </div>
+              <span className="mt-3 font-semibold text-gray-600">Add Company</span>
+            </CardContent>
+          </Card>
+          </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {companies.map((company) => (
+          {/* List Companies */}
+        {filteredCompanies.map((company) => (
           <CompanyCard key={company.id} company={company} />
         ))}
+
+        {/* Glass Empty Search Result */}
+        {filteredCompanies.length === 0 && searchTerm !== "" && (
+          <div className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-3 h-40 flex items-center px-8 bg-white/30 backdrop-blur-sm rounded-xl border border-white/50 border-dashed">
+            <div className="flex items-center space-x-4 text-gray-500">
+              <SearchX className="h-8 w-8" />
+              <div>
+                <p className="font-medium">No matches found for "{searchTerm}"</p>
+                <p className="text-sm opacity-70">Try a different name or industry.</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

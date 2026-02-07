@@ -2,7 +2,7 @@ import { useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import companyLogo from "/icons/web-app-manifest-512x512.png";
-//import { API_BASE_URL } from "@/config";
+import { API_BASE_URL } from "@/config";
 import { Loader2 } from "lucide-react";
 import OfflineBanner from "@/components/common/offlinebanner";
 
@@ -12,13 +12,12 @@ const SplashScreen = () => {
 
   // Ping backend
   useEffect(() => {
-    // Start backend ping in background 
-    /*
+    // Start backend ping in background
     fetch(`${API_BASE_URL}/ping`, { cache: "no-cache" })
       .then((res) => res.json())
       .then((data) => console.log("✅ Backend ping:", data))
       .catch((err) => console.warn("⚠️ Backend not ready yet:", err));
-*/
+
     // Navigate after fixed time (e.g. 5s)
     const timer = setTimeout(() => navigate("/login"), 5000);
     return () => clearTimeout(timer);
@@ -55,14 +54,6 @@ const SplashScreen = () => {
           {/* Replace the old bar with a spinning loader */}
           <Loader2 className="animate-spin w-6 h-6 mt-4" />
 
-          <motion.p
-            className="text-sm opacity-90 mt-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            Launching ...
-          </motion.p>
 
           {/* Version text */}
           <motion.div

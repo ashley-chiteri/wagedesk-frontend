@@ -80,8 +80,8 @@ const TopBar: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative cursor-pointer h-9 w-9 rounded-full">
-                <Avatar className="cursor-pointer h-9 w-9 bg-amber-400">
-                  <AvatarFallback className="bg-amber-400 text-white font-bold">
+                <Avatar className="cursor-pointer h-9 w-9 bg-white">
+                  <AvatarFallback className="bg-white text-[#1F3A8A] font-bold">
                     {firstName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>

@@ -5,6 +5,7 @@ import SplashScreen from "./pages/onboarding/splashScreen";
 import LoginPage from "./pages/onboarding/auth/loginPage.tsx";
 import RootDashboard from "./pages/dashboard/rootDashboard.tsx";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import CompanySetup from "./components/dashboard/CompanySetup.tsx";
 import { supabase } from "./lib/supabaseClient.ts";
 
 const ProtectedRoute = () => {
@@ -50,6 +51,7 @@ const AppRouterWrapper = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<RootDashboard />} />
+            <Route path="/company-setup" element={<CompanySetup />} />
           </Route>
         </Route>
       </Routes>
