@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 // Icons
 import { HelpCircle } from 'lucide-react';
+import companyLogo from '@/assets/WD-BG-WHITE-LOGO.png'
 
 const TopBar: React.FC = () => {
   const { user, logout } = useAuthStore();
@@ -39,7 +40,7 @@ const TopBar: React.FC = () => {
         {/* Left Side: Logo */}
         <div className="flex items-center space-x-2">
           <Link to="/dashboard"> 
-            WageDesk
+           <img src={companyLogo} alt="Wagewise" className="h-8 w-auto" />
           </Link>
         </div>
 

@@ -23,26 +23,133 @@ import {
   Layers,
   Settings2,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 import confetti from "canvas-confetti";
+import axios from "axios";
+import { API_BASE_URL } from "@/config";
 
 import { CompanyProfileForm } from "./CompanyProfileForm";
 import { DepartmentsTable } from "./DepartmentsTable";
 import { SubDepartmentsTable } from "./SubDepartmentsTable";
 import { JobTitlesTable } from "./JobTitlesTable";
+import { toast } from "sonner";
+
+export interface Branch {
+  name: string;
+  branch_code: string;
+  full_code: string;
+}
+
+export interface Bank {
+  bank_code: string;
+  name: string;
+  branches: Branch[];
+}
+
+export interface CompanyFormData {
+  [key: string]: string;
+  // Business Info
+  business_name: string;
+  industry: string;
+  kra_pin: string;
+  company_email: string;
+  company_phone: string;
+  location: string;
+
+  // Statutory
+  nssf_employer: string;
+  shif_employer: string;
+  housing_levy_employer: string;
+  helb_employer: string;
+
+  // Bank Details
+  bank_name: string;
+  branch_name: string;
+  account_name: string;
+  account_number: string;
+}
 
 export default function CompanySetup() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState<
+    { id: string; name: string }[]
+  >([]);
   const navigate = useNavigate();
-  // Placeholder state for future logic: Disable navigation if company doesn't exist
-  const [isCompanyCreated, setIsCompanyCreated] = useState(false);
+
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [companyData, setCompanyData] = useState<CompanyFormData>({
+    business_name: "",
+    industry: "",
+    kra_pin: "",
+    company_email: "",
+    company_phone: "",
+    location: "",
+    nssf_employer: "",
+    shif_employer: "",
+    housing_levy_employer: "",
+    helb_employer: "",
+    bank_name: "",
+    branch_name: "",
+    account_name: "",
+    account_number: "",
+  });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const totalSteps = 4;
 
+  const handleSaveCompany = async () => {
+    setLoading(true);
+    try {
+      const session = useAuthStore.getState().session;
+      const token = session?.access_token;
+
+      const formData = new FormData();
+      Object.keys(companyData).forEach((key) =>
+        formData.append(key, companyData[key]),
+      );
+      // Append logo if exists
+      if (logoFile) formData.append("logo", logoFile);
+      const workspace_id =
+        useAuthStore.getState().activeWorkspace?.workspace_id || "";
+
+      console.log(workspace_id);
+
+      // Assuming workspace_id comes from your auth/context
+      formData.append("workspace_id", workspace_id);
+
+      const response = await axios.post(`${API_BASE_URL}/company`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data", // Required for file uploads
+        },
+      });
+      setCompanyId(response.data.id);
+      toast.success("Company Saved");
+      setStep(2); // Move to departments
+    } catch (error) {
+      toast.error("Save failed");
+      console.error("Save failed", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFinish = async () => {
+    // Trigger a refresh of the workspace context to show the new company on the dashboard
+    await useAuthStore.getState().loadContext();
+    navigate("/dashboard");
+  };
+
   const nextStep = () => {
-    if (step < totalSteps) setStep(step + 1);
-    // logic for "save " will go here
-    else setDone(true);
+    if (step === 1 && !companyId) {
+      handleSaveCompany();
+    } else if (step < totalSteps) {
+      setStep(step + 1);
+    } else {
+      setDone(true);
+    }
   };
 
   const prevStep = () => {
@@ -73,7 +180,7 @@ export default function CompanySetup() {
           <Button
             variant="ghost"
             onClick={prevStep}
-            className="text-muted-foreground hover:text-foreground p-0 h-auto"
+            className="text-muted-foreground hover:text-foreground p-0 h-auto cursor-pointer"
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
             {step === 1 ? "Back to Dashboard" : "Previous step"}
@@ -110,22 +217,41 @@ export default function CompanySetup() {
             <CardContent className="p-10">
               {/* Dynamic Form Content */}
               <div className="min-h-75">
-                {step === 1 && <CompanyProfileForm />}
-                {step === 2 && <DepartmentsTable />}
-                {step === 3 && <SubDepartmentsTable />}
-                {step === 4 && <JobTitlesTable />}
+                {step === 1 && (
+                  <CompanyProfileForm
+                    data={companyData}
+                    setData={setCompanyData}
+                    setLogoFile={setLogoFile}
+                  />
+                )}
+                {step === 2 && (
+                  <DepartmentsTable
+                    companyId={companyId!}
+                    onDepartmentsChange={setDepartments}
+                  />
+                )}
+                {step === 3 && (
+                  <SubDepartmentsTable
+                    companyId={companyId!}
+                    departments={departments}
+                  />
+                )}
+                {step === 4 && <JobTitlesTable companyId={companyId!} />}
               </div>
 
               {/* Navigation Actions */}
               <div className="mt-12 flex justify-end">
                 <Button
                   onClick={nextStep}
-                  // Disable if on step > 1 and no company created (Logic to be implemented)
-                  disabled={step > 1 && !isCompanyCreated && false}
-                  className="bg-[#1F3A8A] hover:bg-[#162a63] px-5 h-12 rounded-lg text-md font-semibold shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5"
+                  disabled={loading}
+                  className="bg-[#1F3A8A] hover:bg-[#162a63] px-5 h-12 rounded-lg text-md font-semibold shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 cursor-pointer"
                 >
-                  {step === totalSteps ? "Finish Setup" : "Save & Continue"}
-                  {step !== totalSteps && (
+                  {loading
+                    ? "Saving..."
+                    : step === totalSteps
+                      ? "Finish Setup"
+                      : "Save & Continue"}
+                  {!loading && step !== totalSteps && (
                     <ChevronRight className="ml-2 h-5 w-5" />
                   )}
                 </Button>
@@ -151,29 +277,22 @@ export default function CompanySetup() {
             </div>
             <DialogHeader>
               <DialogTitle className="text-center text-3xl font-bold text-slate-900 tracking-tight">
-                Setup complete
+                Setup Submitted
               </DialogTitle>
             </DialogHeader>
 
             <p className="mt-4 text-slate-500 text-base leading-relaxed max-w-sm mx-auto">
-              Your workspace has been successfully configured. You can now start
-              managing employees and payroll.
+              Your company profile has been created successfully. Our team will
+              review the details shortly. In the meantime, you can manage your
+              workspace settings from the dashboard.
             </p>
 
-            <div className="mt-12 space-y-4">
+            <div className="mt-12">
               <Button
                 className="w-full bg-[#1F3A8A] hover:bg-[#162a63] h-14 rounded-2xl text-base font-semibold shadow-md transition-all hover:-translate-y-px"
-                onClick={() => navigate("/employees")}
+                onClick={handleFinish}
               >
-                Go to Employee Directory
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full h-12 rounded-xl text-slate-400 hover:text-slate-600 font-medium"
-                onClick={() => navigate("/dashboard")}
-              >
-                Back to Dashboard
+                Return to Dashboard
               </Button>
             </div>
           </div>
