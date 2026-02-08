@@ -1,7 +1,7 @@
 // src/components/dashboard/TopBar.tsx
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
+import React, { useState, useMemo, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useAuthStore, Company } from "@/stores/authStore";
 import { toast } from "sonner";
 
 // ShadCN UI Components
@@ -23,11 +23,22 @@ import {
 
 // Icons
 import { HelpCircle } from "lucide-react";
-import companyLogo from "@/assets/WD-BG-WHITE-LOGO.png";
 
-const TopBar: React.FC = () => {
-  const { user, logout } = useAuthStore();
+const CompanyTopBar: React.FC = () => {
+  const { user, logout, activeWorkspace } = useAuthStore();
+  const { companyId } = useParams();
+  const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const navigate = useNavigate();
+
+  const companies = useMemo(() => {
+    return activeWorkspace?.workspaces?.companies || [];
+  }, [activeWorkspace]);
+
+  useEffect(() => {
+    // Find the company with the matching ID
+    const foundCompany = companies.find((c) => c.id === companyId);
+    setCurrentCompany(foundCompany || null);
+  }, [companyId, companies]);
 
   const fullName = useAuthStore.getState().activeWorkspace?.full_names || "";
   const firstName = fullName.split(" ")[0] || "User";
@@ -46,15 +57,18 @@ const TopBar: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Tooltip>
             <TooltipTrigger asChild>
-               <Link to="/dashboard">
-            <img src={companyLogo} alt="Wagewise" className="h-8 w-auto" />
-          </Link>
+              <Link to="/dashboard">
+                <img
+                  src={currentCompany?.logo_url}
+                  alt={currentCompany?.business_name}
+                  className="h-8 w-auto"
+                />
+              </Link>
             </TooltipTrigger>
             <TooltipContent>
               <p>Home</p>
             </TooltipContent>
           </Tooltip>
-         
         </div>
 
         {/* Right Side: Actions and Profile */}
@@ -144,4 +158,4 @@ const TopBar: React.FC = () => {
   );
 };
 
-export default TopBar;
+export default CompanyTopBar;

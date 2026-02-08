@@ -30,7 +30,7 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
       : "bg-yellow-100 text-yellow-700";
 
   return (
-    <Link to={`/company/${company.id}/overview`}>
+    <Link to={`/company/${company.id}/modules`}>
       <Card className="w-full h-40 p-5 flex flex-col justify-between bg-white/70 backdrop-blur-md border-white/40 hover:border-purple-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-xl shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
@@ -48,22 +48,22 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <Link to={`/company/${company.id}/settings`}>
-                <DropdownMenuItem>View Settings</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">View Settings</DropdownMenuItem>
               </Link>
-              <Link to={`/company/${company.id}/hr/employees`}>
-                <DropdownMenuItem>Manage Employees</DropdownMenuItem>
+              <Link to={`/company/${company.id}/employees`}>
+                <DropdownMenuItem className="cursor-pointer">Manage Employees</DropdownMenuItem>
               </Link>
-              <Link to={`/company/${company.id}/payroll/pay-runs`}>
-                <DropdownMenuItem>Run Payroll</DropdownMenuItem>
+              <Link to={`/company/${company.id}/payroll/run`}>
+                <DropdownMenuItem className="cursor-pointer">Run Payroll</DropdownMenuItem>
               </Link>
-              <Link to={`/company/${company.id}/reports`}>
-                <DropdownMenuItem>View Reports</DropdownMenuItem>
+              <Link to={`/company/${company.id}/reports/overview/statutory`}>
+                <DropdownMenuItem className="cursor-pointer">View Reports</DropdownMenuItem>
               </Link>
             </DropdownMenuContent>
           </DropdownMenu>

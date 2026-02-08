@@ -36,7 +36,7 @@ const RootDashboard = () => {
     );
   }, [companies, searchTerm]);
 
-if (loading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center mb-6">
@@ -44,7 +44,10 @@ if (loading) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="h-40 bg-white/40 backdrop-blur-md border-white/40 animate-pulse rounded-xl">
+            <Card
+              key={i}
+              className="h-40 bg-white/40 backdrop-blur-md border-white/40 animate-pulse rounded-xl"
+            >
               <div className="p-4 space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-gray-200 rounded-full" />
@@ -99,24 +102,23 @@ if (loading) {
     );
   }
 
-  if (companies.length === 0 ) {
+  if (companies.length === 0) {
     return (
-       <EmptyState
-                icon={PlusCircle}
-                title="Welcome to your Workspace"
-                description="Now, let's create your first company to start managing your payroll."
-                actionLabel="Set up company"
-                onAction={() => navigate("/company-setup")}
-            />
-    )
-
+      <EmptyState
+        icon={PlusCircle}
+        title="Welcome to your Workspace"
+        description="Now, let's create your first company to start managing your payroll."
+        actionLabel="Set up company"
+        onAction={() => navigate("/company-setup")}
+      />
+    );
   }
 
   //Show Grid if companies exis
   return (
     <div className="container mx-auto px-4 py-6">
       <OfflineBanner />
-      
+
       <div className="flex items-center mb-6">
         <Input
           placeholder="Search for company"
@@ -125,20 +127,22 @@ if (loading) {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/*add compny Card */}
-          <Link to={"/company-setup"}>
-           <Card className="group relative overflow-hidden h-40 bg-white/40 backdrop-blur-lg border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-white/60 transition-all duration-300 rounded-xl flex items-center justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/*add compny Card */}
+        <Link to={"/company-setup"}>
+          <Card className="group relative overflow-hidden h-40 bg-white/40 backdrop-blur-lg border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-white/60 transition-all duration-300 rounded-xl flex items-center justify-center">
             <CardContent className="flex flex-col items-center p-0">
               <div className="p-3 rounded-full bg-purple-100 text-purple-600 group-hover:scale-110 transition-transform">
                 <Plus className="h-6 w-6" />
               </div>
-              <span className="mt-3 font-semibold text-gray-600">Add Company</span>
+              <span className="mt-3 font-semibold text-gray-600">
+                Add Company
+              </span>
             </CardContent>
           </Card>
-          </Link>
+        </Link>
 
-          {/* List Companies */}
+        {/* List Companies */}
         {filteredCompanies.map((company) => (
           <CompanyCard key={company.id} company={company} />
         ))}
@@ -149,8 +153,12 @@ if (loading) {
             <div className="flex items-center space-x-4 text-gray-500">
               <SearchX className="h-8 w-8" />
               <div>
-                <p className="font-medium">No matches found for "{searchTerm}"</p>
-                <p className="text-sm opacity-70">Try a different name or industry.</p>
+                <p className="font-medium">
+                  No matches found for "{searchTerm}"
+                </p>
+                <p className="text-sm opacity-70">
+                  Try a different name or industry.
+                </p>
               </div>
             </div>
           </div>

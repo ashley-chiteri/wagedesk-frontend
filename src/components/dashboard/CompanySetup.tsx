@@ -165,7 +165,7 @@ export default function CompanySetup() {
   }, [done]);
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-6">
+    <div className="max-w-6xl mx-auto px-6 py-6">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
         {/* Sidebar Stepper - Sticky */}
         <div className="md:col-span-4 lg:col-span-3 sticky top-12 space-y-8">
@@ -215,7 +215,7 @@ export default function CompanySetup() {
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-10">
+           <CardContent className="p-10">
               {/* Dynamic Form Content */}
               <div className="min-h-75">
                 {step === 1 && (
