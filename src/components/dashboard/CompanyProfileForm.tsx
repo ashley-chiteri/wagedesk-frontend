@@ -41,6 +41,7 @@ export interface Bank {
 }
 
 export interface CompanyFormData {
+  [key: string]: string;
   // Business Info
   business_name: string;
   industry: string;
@@ -66,14 +67,13 @@ interface FormProps {
   data: CompanyFormData;
   setData: Dispatch<SetStateAction<CompanyFormData>>;
   setLogoFile: (file: File | null) => void;
+  logoPreview: string | null;
+  setLogoPreview: (preview: string | null) => void;
 }
-
 
 interface FloatingFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
 }
-
-
 
 // Reusable Floating Field with the "Border-Cut" style from your image
 function FloatingField({ label, ...props }: FloatingFieldProps) {
@@ -97,8 +97,14 @@ function FloatingField({ label, ...props }: FloatingFieldProps) {
   );
 }
 
-export function CompanyProfileForm({ data, setData, setLogoFile }: FormProps) {
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+export function CompanyProfileForm({
+  data,
+  setData,
+  setLogoFile,
+  logoPreview,
+  setLogoPreview,
+}: FormProps) {
+  //const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
@@ -109,20 +115,50 @@ export function CompanyProfileForm({ data, setData, setLogoFile }: FormProps) {
   useEffect(() => {
     fetch(`${API_BASE_URL}/banks`)
       .then((res) => res.json())
-      .then((data) => setBanks(data))
+      .then((banksData) => {
+        setBanks(banksData);
+
+        // Restore selected bank if it exists in form data
+        if (data.bank_name) {
+          const savedBank = banksData.find(
+            (bank: Bank) => bank.name === data.bank_name,
+          );
+          if (savedBank) {
+            setSelectedBank(savedBank);
+
+            // Restore selected branch if it exists in form data
+            if (data.branch_name && savedBank.branches) {
+              const savedBranch = savedBank.branches.find(
+                (branch: Branch) => branch.name === data.branch_name,
+              );
+              if (savedBranch) {
+                setSelectedBranch(savedBranch);
+              }
+            }
+          }
+        }
+      })
       .catch((err) => console.error("Error fetching banks:", err));
-  }, []);
+  }, [data.bank_name, data.branch_name]); // Re-run when form data changes
 
   const handleChange = (field: keyof CompanyFormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
 
-const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreview(previewUrl);
+    }
+  };
+
+  const handleLogoRemove = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -177,7 +213,8 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                   className="max-h-32 object-contain"
                 />
                 <button
-                  onClick={() => setLogoPreview(null)}
+                  type="button" 
+                  onClick={handleLogoRemove}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm"
                 >
                   <X size={14} />
@@ -233,7 +270,9 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
           <FloatingField
             label="Housing Levy No."
             value={data.housing_levy_employer || ""}
-            onChange={(e) => handleChange("housing_levy_employer", e.target.value)}
+            onChange={(e) =>
+              handleChange("housing_levy_employer", e.target.value)
+            }
           />
           <FloatingField
             label="HELB Employer No."
@@ -270,7 +309,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                   <CommandList>
                     <CommandEmpty>No bank found.</CommandEmpty>
                     <CommandGroup>
-                      {banks.map((bank) => (
+                      {banks.map((bank : Bank) => (
                         <CommandItem
                           key={bank.bank_code}
                           onSelect={() => {
@@ -309,7 +348,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                   <CommandList>
                     <CommandEmpty>No branch found.</CommandEmpty>
                     <CommandGroup>
-                      {selectedBank?.branches.map((branch) => (
+                      {selectedBank?.branches.map((branch: Branch) => (
                         <CommandItem
                           key={branch.full_code}
                           onSelect={() => {

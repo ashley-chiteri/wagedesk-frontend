@@ -23,6 +23,7 @@ interface DepartmentsTableProps {
 export function DepartmentsTable({ companyId, onDepartmentsChange }: DepartmentsTableProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] =  useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const token = useAuthStore.getState().session?.access_token;
@@ -43,6 +44,7 @@ export function DepartmentsTable({ companyId, onDepartmentsChange }: Departments
  }, [companyId, token, onDepartmentsChange]);
 
   const handleAdd = async () => {
+    setSaveLoading(true)
     if (!newName) return;
     try {
       await axios.post(`${API_BASE_URL}/company/departments`, 
@@ -53,7 +55,11 @@ export function DepartmentsTable({ companyId, onDepartmentsChange }: Departments
       setIsAddOpen(false);
       fetchDepartments();
       toast.success("Department added");
-    } catch (err) { toast.error("Failed to add"); }
+    } catch (err) { 
+      toast.error("Failed to add");
+     } finally {
+       setSaveLoading(false)
+     }
   };
 
   const handleDelete = async (id: string) => {
@@ -91,7 +97,14 @@ export function DepartmentsTable({ companyId, onDepartmentsChange }: Departments
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-              <Button className="bg-[#1F3A8A]" onClick={handleAdd}>Save Department</Button>
+              <Button className="bg-[#1F3A8A]" disabled={saveLoading} onClick={handleAdd}>
+                {saveLoading ? (
+                  <Loader2 className="mr-2 cursor-not-allowed h-4 w-4 animate-spin" />
+                ) : (
+                  "Save Department"
+                )}
+                
+                </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

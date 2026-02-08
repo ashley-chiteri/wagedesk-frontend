@@ -17,6 +17,7 @@ interface JobTitle {
 export function JobTitlesTable({ companyId }: { companyId: string }) {
  const [titles, setTitles] = useState<JobTitle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] =  useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const token = useAuthStore.getState().session?.access_token;
@@ -32,6 +33,7 @@ export function JobTitlesTable({ companyId }: { companyId: string }) {
   }, [companyId, token]);
 
   const handleAdd = async () => {
+    setSaveLoading(true)
     try {
       await axios.post(`${API_BASE_URL}/company/job-titles`, 
         { company_id: companyId, title: newTitle },
@@ -41,7 +43,11 @@ export function JobTitlesTable({ companyId }: { companyId: string }) {
       setIsAddOpen(false);
       fetchTitles();
       toast.success("Job title added");
-    } catch (err) { toast.error("Failed to add title"); }
+    } catch (err) { 
+      toast.error("Failed to add title"); 
+    } finally {
+       setSaveLoading(false)
+     }
   };
 
  useEffect(() => { 
@@ -62,7 +68,13 @@ export function JobTitlesTable({ companyId }: { companyId: string }) {
               <Input placeholder="e.g. Senior Accountant" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
             </div>
             <DialogFooter>
-              <Button className="bg-[#1F3A8A] w-full" onClick={handleAdd}>Save Title</Button>
+              <Button className="bg-[#1F3A8A] w-full" disabled={saveLoading} onClick={handleAdd}>
+                {saveLoading ? (
+                  <Loader2 className="mr-2 cursor-not-allowed h-4 w-4 animate-spin" />
+                ) : (
+                  "Save Title"
+                )}
+                </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

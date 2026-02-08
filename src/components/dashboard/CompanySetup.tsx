@@ -96,6 +96,7 @@ export default function CompanySetup() {
     account_number: "",
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const totalSteps = 4;
 
@@ -222,6 +223,8 @@ export default function CompanySetup() {
                     data={companyData}
                     setData={setCompanyData}
                     setLogoFile={setLogoFile}
+                    logoPreview={logoPreview}
+                    setLogoPreview={setLogoPreview}
                   />
                 )}
                 {step === 2 && (

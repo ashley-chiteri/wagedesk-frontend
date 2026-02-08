@@ -15,6 +15,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const toProperCase = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +33,7 @@ const LoginPage = () => {
     try {
       await login(email, password);
       const state = useAuthStore.getState();
-      const role = state.activeWorkspace?.role;
+      const role = toProperCase(state.activeWorkspace?.role || "User");
       console.log (state.activeWorkspace)
      if (role) {
       toast.success(`Logged in as ${role}`);

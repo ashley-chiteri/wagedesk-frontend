@@ -15,6 +15,9 @@ import { Badge } from "@/components/ui/badge";
 interface CompanyCardProps {
   company: Company;
 }
+const toProperCase = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 export const CompanyCard = ({ company }: CompanyCardProps) => {
   const fallbackLetter = company.business_name
@@ -69,7 +72,7 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
         {/* Status Tag */}
         <div className="flex items-center justify-between">
           <Badge className={`${statusColor} border-none shadow-none capitalize px-3 py-1 text-[10px] font-bold`}>
-            ● {status}
+            ● {toProperCase(status)}
           </Badge>
           <span className="text-[12px] text-gray-400 font-medium">Click to manage →</span>
         </div>
