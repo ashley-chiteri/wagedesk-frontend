@@ -7,7 +7,7 @@ const ModuleLayout = () => {
         <div className="flex flex-col h-screen overflow-hidden">
             <OfflineBanner/>
           <CompanyTopBar />
-          <main className="flex-1 bg-gray-50 overflow-hidden">
+          <main className="flex-1 bg-gray-50 overflow-y-auto">
             <Outlet /> {/* Child routes will render here */}
           </main>
         </div>

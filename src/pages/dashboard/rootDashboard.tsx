@@ -7,6 +7,7 @@ import {
   Mail,
   Plus,
   SearchX,
+  Search
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
@@ -119,10 +120,11 @@ const RootDashboard = () => {
     <div className="container mx-auto px-4 py-6">
       <OfflineBanner />
 
-      <div className="flex items-center mb-6">
+      <div className="relative w-full max-w-sm mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <Input
           placeholder="Search for company"
-          className="max-w-xs h-10 bg-white/60 backdrop-blur-md border-white/20 shadow-sm focus:ring-purple-500 rounded-md px-4"
+          className=" pl-9 h-10 bg-white border-slate-300 shadow-none focus-visible:ring-1 focus-visible:ring-blue-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

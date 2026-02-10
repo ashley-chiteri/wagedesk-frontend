@@ -1,4 +1,4 @@
-import { Company } from "@/stores/authStore";
+import { Company, useAuthStore } from "@/stores/authStore";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import {
@@ -20,6 +20,8 @@ const toProperCase = (str: string) => {
 };
 
 export const CompanyCard = ({ company }: CompanyCardProps) => {
+  const state = useAuthStore.getState();
+  const role = toProperCase(state.activeWorkspace?.role || "Viewer");
   const fallbackLetter = company.business_name
     ? company.business_name.charAt(0).toUpperCase()
     : "C";
@@ -41,8 +43,12 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-gray-800 line-clamp-1">{company.business_name}</span>
-              <span className="text-xs font-medium text-purple-600 uppercase tracking-wider">{company.industry || 'General'}</span>
+              <span className="text-lg font-bold text-gray-800 line-clamp-1">
+                {company.business_name}
+              </span>
+              <span className="text-xs font-medium text-purple-600 tracking-wider">
+                {company.industry || "General"}
+              </span>
             </div>
           </div>
 
@@ -54,27 +60,41 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <Link to={`/company/${company.id}/settings`}>
-                <DropdownMenuItem className="cursor-pointer">View Settings</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  View Settings
+                </DropdownMenuItem>
               </Link>
               <Link to={`/company/${company.id}/employees`}>
-                <DropdownMenuItem className="cursor-pointer">Manage Employees</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  Manage Employees
+                </DropdownMenuItem>
               </Link>
               <Link to={`/company/${company.id}/payroll/run`}>
-                <DropdownMenuItem className="cursor-pointer">Run Payroll</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  Run Payroll
+                </DropdownMenuItem>
               </Link>
-              <Link to={`/company/${company.id}/reports/overview/statutory`}>
-                <DropdownMenuItem className="cursor-pointer">View Reports</DropdownMenuItem>
-              </Link>
+              {role !== "Viewer" && (
+                <Link to={`/company/${company.id}/reports/overview/statutory`}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    View Reports
+                  </DropdownMenuItem>
+                </Link>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         {/* Status Tag */}
         <div className="flex items-center justify-between">
-          <Badge className={`${statusColor} border-none shadow-none capitalize px-3 py-1 text-[10px] font-bold`}>
+          <Badge
+            className={`${statusColor} border-none shadow-none capitalize px-3 py-1 text-[10px] font-bold hover:bg-white`}
+          >
             ● {toProperCase(status)}
           </Badge>
-          <span className="text-[12px] text-gray-400 font-medium">Click to manage →</span>
+          <span className="text-[12px] text-gray-400 font-medium">
+            Click to manage →
+          </span>
         </div>
       </Card>
     </Link>

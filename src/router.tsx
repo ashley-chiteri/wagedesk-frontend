@@ -10,10 +10,14 @@ import CompanySetup from "./components/dashboard/CompanySetup.tsx";
 import { supabase } from "./lib/supabaseClient.ts";
 import ModuleDashboard from "./pages/company/layout/moduleDashboard.tsx";
 import ModuleLayout from "./pages/company/layout/moduleLayout.tsx";
-import EmployeeLayout from "./pages/company/employees/employeeLayout.tsx";
 import EmployeeSection from "./pages/company/employees/employeeSection.tsx";
-import NonActiveEmployees from "./pages/company/employees/nonActiveEmployees.tsx";
-import TerminatedEmployees from "./pages/company/employees/TerminatedEmployees.tsx";
+import AddEmployees from "./pages/company/employees/AddEmployee.tsx";
+import EmployeeDetailsLayout from "./components/company/employees/layouts/EmployeeDetailsLayout.tsx";
+import EmployeeDeductions from "./pages/company/employees/details/Deductions.tsx";
+import PaymentDetails from "./pages/company/employees/details/Payments.tsx";
+import PersonalDetails from "./pages/company/employees/details/PersonalDetails.tsx";
+import ContractDetails from "./pages/company/employees/details/Contracts.tsx";
+import EmployeeAllowances from "./pages/company/employees/details/Allowances.tsx";
 import PayrollLayout from "./pages/company/payroll/PayrollLayout.tsx";
 import RunPayroll from "./pages/company/payroll/runPayroll.tsx";
 import PayrollHistory from "./pages/company/payroll/PayrollHistory.tsx";
@@ -85,16 +89,16 @@ const AppRouterWrapper = () => {
           <Route path="/company/:companyId" element={<ModuleLayout />}>
             <Route index element={<Navigate to="modules" replace />} />
             <Route path="modules" element={<ModuleDashboard />} />
-            <Route element={<EmployeeLayout />}>
-              <Route path="employees" element={<EmployeeSection />} />
-              <Route
-                path="employees/non-active"
-                element={<NonActiveEmployees />}
-              />
-              <Route
-                path="employees/terminated"
-                element={<TerminatedEmployees />}
-              />
+            <Route path="employees" element={<EmployeeSection />} />
+            <Route path="employees/add-employee" element={<AddEmployees />} />
+            {/* Employee details */}
+            <Route path="employees/:employeeId" element={<EmployeeDetailsLayout />}>
+              <Route index element={<PersonalDetails />} />
+              <Route path="personal" element={<PersonalDetails />} />
+              <Route path="contracts" element={<ContractDetails />} />
+              <Route path="payments" element={<PaymentDetails />} />
+              <Route path="deductions" element={<EmployeeDeductions/>} />
+              <Route path="allowances" element={<EmployeeAllowances />} />
             </Route>
             {/**Payroll specific dashboards */}
             <Route path="payroll" element={<PayrollLayout />}>
