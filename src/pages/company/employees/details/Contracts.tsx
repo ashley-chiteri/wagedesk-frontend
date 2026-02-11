@@ -1,20 +1,32 @@
+import {
+  SectionDetailsHeader,
+  EditButton,
+} from "@/components/company/employees/employeeutils";
 export default function ContractDetails() {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-slate-900">
-        Employee Contract
-      </h3>
+    <section>
+  <div className="flex justify-between">
+    <SectionDetailsHeader title="Employment Terms" />
+    <EditButton />
+  </div>
+  <div className="grid grid-cols-2 gap-8">
+    <DetailItem label="Contract Type" value="Permanent" />
+    <DetailItem label="Hire Date" value="Jan 01, 2024" />
+    <DetailItem label="Probation End" value="Apr 01, 2024" />
+    <DetailItem label="Status" value="ACTIVE" />
+  </div>
+</section>
+  );
+}
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-slate-400">First name</p>
-          <p>Mohammed</p>
-        </div>
-        <div>
-          <p className="text-slate-400">Last name</p>
-          <p>Saraki</p>
-        </div>
-      </div>
+// Helper component for crisp data display
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="group">
+      <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-1 group-hover:text-indigo-500 transition-colors">
+        {label}
+      </p>
+      <p className="text-sm font-medium text-slate-700">{value}</p>
     </div>
   );
 }

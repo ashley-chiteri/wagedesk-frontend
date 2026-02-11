@@ -65,6 +65,10 @@ export default function EmployeeSection() {
     fetchEmployees();
   }, [fetchEmployees]);
 
+  const handleDeleteSuccess = () => {
+    fetchEmployees(); // Re-fetch employees
+  };
+
   return (
     <div className="min-h-full p-4 flex flex-col">
       <Card className="flex flex-col flex-1 border border-slate-200 shadow-none rounded-sm">
@@ -114,12 +118,13 @@ export default function EmployeeSection() {
         </CardHeader>
 
         <CardContent className="flex-1 overflow-auto">
-          <EmployeesTable data={employees} loading={loading} error={error} />
+          <EmployeesTable data={employees} loading={loading} error={error} onDeleteSuccess={handleDeleteSuccess}  />
         </CardContent>
         <ImportEmployeeDialog
           isOpen={isImportDialogOpen}
           onClose={() => setIsImportDialogOpen(false)}
           fetchEmployees={fetchEmployees}
+          
         />
       </Card>
     </div>

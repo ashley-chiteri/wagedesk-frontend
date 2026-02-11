@@ -31,12 +31,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Trash2, Inbox, Search } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from '@/config';
 import { Employee } from "@/types/employees";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import ConfirmationDialog from "./confirmationDialog";
+import EmailComposeDialog from "@/components/common/EmailComposeDialog";
+
+type EmailMode = "single" | "bulk";
+
+interface EmailDialogState {
+  open: boolean;
+  mode: EmailMode;
+  recipients: string[]; // emails
+}
 
 const EmployeeStatusBadge = ({ status }: { status: string }) => {
   const getVariant = (status: string) => {
@@ -62,11 +74,18 @@ interface Props {
   data: Employee[];
   loading: boolean;
   error: string | null;
+  onDeleteSuccess?: () => void;
 }
 
-const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
+const EmployeesTable: React.FC<Props> = ({ data, loading, error,  onDeleteSuccess }) => {
   const { companyId } = useParams();
   const navigate = useNavigate();
+  const session = useAuthStore.getState().session;
+  const [emailDialog, setEmailDialog] = React.useState<EmailDialogState>({
+    open: false,
+    mode: "single",
+    recipients: [],
+  });
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -76,12 +95,82 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
   ]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = React.useState({});
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] =
+    React.useState(false);
+ // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [employeesToDelete, setEmployeesToDelete] = React.useState<string[]>(
+    [],
+  );
+  const [isBulkDeleting, setIsBulkDeleting] = React.useState(false);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
+ 
+  /*
+  const handleDeleteClick = (employeeId: string) => {
+    setEmployeesToDelete([employeeId]);
+    setIsDeleteDialogOpen(true);
+  }; */
 
-  console.log(companyId);
+  const handleBulkDelete = () => {
+    const selectedIds = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original.id);
+    if (selectedIds.length > 0) {
+      setEmployeesToDelete(selectedIds);
+      setIsBulkDeleteDialogOpen(true);
+    }
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    setIsBulkDeleting(true);
+    if (employeesToDelete.length === 0 || !companyId) return;
+
+    const token = session?.access_token;
+
+    if (!token) {
+      toast.error("Authentication token not found. Please log in again.");
+      return;
+    }
+
+    try {
+      // This implementation sends a separate delete request for each employee
+      const results = await Promise.all(employeesToDelete.map(employeeToDelete =>
+        fetch(`${API_BASE_URL}/company/${companyId}/employees/${employeeToDelete}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+      ));
+
+      //const successfulDeletes = results.filter(res => res.ok);
+      const failedDeletes = results.filter(res => !res.ok);
+
+      if (failedDeletes.length > 0) {
+        throw new Error('Failed to delete some employees.');
+      }
+
+      toast.success(
+        `${employeesToDelete.length} employee(s) deleted successfully.`,
+      );
+      setRowSelection({});
+     setIsBulkDeleteDialogOpen(false);
+
+      // Call the callback to refresh data
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
+      
+
+    } catch (err: unknown) {
+      toast.error("Failed to delete employees.");
+      console.error((err as Error).message);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   const columns: ColumnDef<Employee>[] = [
     {
@@ -102,7 +191,7 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
-          className="translate-y-0.5 shadow-none "
+          className="translate-y-0.5 shadow-none cursor-pointer "
           onClick={(e) => e.stopPropagation()}
         />
       ),
@@ -175,7 +264,11 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
             size="sm"
             className="h-8 w-8 p-0 cursor-pointer text-slate-400 hover:text-blue-600 hover:bg-blue-50"
             onClick={() =>
-              toast.info(`Sending email to ${row.original.first_name}...`)
+              setEmailDialog({
+                open: true,
+                mode: "single",
+                recipients: [row.original.email as string],
+              })
             }
           >
             <Mail className="h-4 w-4" />
@@ -222,6 +315,9 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
         reversedFullName.includes(searchTerm)
       );
     },
+    meta: {
+      //onBulkDeleteClick: handleDeleteClick,
+    },
   });
 
   const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -245,10 +341,8 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
             <Button
               variant="outline"
               size="sm"
-              className="text-rose-600 border-rose-200 hover:bg-rose-50 shadow-none h-9"
-              onClick={() =>
-                toast.error(`Deleting ${selectedRows.length} records...`)
-              }
+              className="text-rose-600 border-rose-200 hover:bg-rose-50 shadow-none h-9 cursor-pointer"
+              onClick={handleBulkDelete}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete ({selectedRows.length})
@@ -256,9 +350,15 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
             <Button
               variant="outline"
               size="sm"
-              className="text-blue-600 border-blue-200 hover:bg-blue-50 shadow-none h-9"
+              className="text-blue-600 border-blue-200 cursor-pointer hover:bg-blue-50 shadow-none h-9"
               onClick={() =>
-                toast.info(`Emailing ${selectedRows.length} employees...`)
+                setEmailDialog({
+                  open: true,
+                  mode: "bulk",
+                  recipients: selectedRows
+                    .map((r) => r.original.email as string)
+                    .filter(Boolean),
+                })
               }
             >
               <Mail className="mr-2 h-4 w-4" />
@@ -385,6 +485,21 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error }) => {
           </PaginationContent>
         </Pagination>
       </div>
+      <EmailComposeDialog
+        open={emailDialog.open}
+        mode={emailDialog.mode}
+        recipients={emailDialog.recipients}
+        onClose={() => setEmailDialog((prev) => ({ ...prev, open: false }))}
+      />
+
+      <ConfirmationDialog
+        isOpen={isBulkDeleteDialogOpen}
+        onClose={() => setIsBulkDeleteDialogOpen(false)}
+        onConfirm={handleBulkDeleteConfirm}
+        title={`Are you sure you want to delete ${employeesToDelete.length} employee(s)?`}
+        description="This action cannot be undone. This will permanently delete the employee records."
+        isConfirming={isBulkDeleting}
+      />
     </div>
   );
 };

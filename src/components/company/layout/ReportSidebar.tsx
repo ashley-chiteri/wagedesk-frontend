@@ -39,7 +39,7 @@ export default function ReportSidebar() {
             end={item.exact}
             className={({ isActive }) =>
               clsx(
-                "flex items-center px-3 py-2.5 rounded-md text-md font-medium transition-all duration-200 group",
+                "flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 group",
                 isActive
                   ? "bg-[#1F3A8A]/10 text-[#1F3A8A] translate-x-1"
                   : "text-slate-400 hover:bg-slate-50 hover:text-slate-900"

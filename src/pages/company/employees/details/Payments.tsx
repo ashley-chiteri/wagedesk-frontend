@@ -1,20 +1,32 @@
+import {
+  SectionDetailsHeader,
+  EditButton,
+} from "@/components/company/employees/employeeutils";
 export default function PaymentDetails() {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-slate-900">
-        Payment Information
-      </h3>
+    <section>
+  <div className="flex justify-between mb-4">
+    <SectionDetailsHeader title="Bank Account Details" />
+    <EditButton />
+  </div>
+  <div className="grid grid-cols-2 gap-8 bg-slate-50 p-6 rounded-lg border border-slate-100">
+    <DetailItem label="Bank Name" value="Equity Bank" />
+    <DetailItem label="Account Number" value="0123456789012" />
+    <DetailItem label="Account Name" value="Mohammed Saraki" />
+    <DetailItem label="Payment Method" value="BANK" />
+  </div>
+</section>
+  );
+}
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-slate-400">First name</p>
-          <p>Mohammed</p>
-        </div>
-        <div>
-          <p className="text-slate-400">Last name</p>
-          <p>Saraki</p>
-        </div>
-      </div>
+// Helper component for crisp data display
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="group">
+      <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-1 group-hover:text-indigo-500 transition-colors">
+        {label}
+      </p>
+      <p className="text-sm font-medium text-slate-700">{value}</p>
     </div>
   );
 }

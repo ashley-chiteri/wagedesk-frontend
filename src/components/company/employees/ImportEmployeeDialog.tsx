@@ -31,6 +31,7 @@ const ImportEmployeeDialog: React.FC<ImportEmployeeDialogProps> = ({
  const session = useAuthStore.getState().session;
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setloading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -49,6 +50,7 @@ const ImportEmployeeDialog: React.FC<ImportEmployeeDialogProps> = ({
   });
 
   const handleDownloadTemplate = async () => {
+    setloading(true)
     if (!companyId) {
       toast.error("Company ID is missing.");
       return;
@@ -87,6 +89,8 @@ const ImportEmployeeDialog: React.FC<ImportEmployeeDialogProps> = ({
       } else {
         toast.error("Failed to download template.");
       }
+    } finally {
+      setloading(false)
     }
   };
 
@@ -155,8 +159,9 @@ const ImportEmployeeDialog: React.FC<ImportEmployeeDialogProps> = ({
             <Button
               variant="outline"
               onClick={handleDownloadTemplate}
-              className="w-full"
+              className="w-full cursor-pointer"
             >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Download className="mr-2 h-4 w-4" /> Download Employee Excel
               Template
             </Button>
