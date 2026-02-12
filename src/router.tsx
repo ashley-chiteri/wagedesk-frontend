@@ -34,8 +34,11 @@ import AnnualReports from "./pages/company/reports/AnnualReports.tsx";
 import P9AReports from "./pages/company/reports/P9A-Reports.tsx";
 import SettingsLayout from "./pages/company/settings/SettingsLayout.tsx";
 import SettingsOverview from "./pages/company/settings/SettiingsOverview.tsx";
-import HRMSettings from "./pages/company/settings/HRM.tsx";
+import HRMSettingsLayout from "./pages/company/settings/HRMLayout.tsx";
+import JobTitlesSettings from "./pages/company/settings/JobTitles.tsx";
+import DepartmentSettings from "./pages/company/settings/Departments.tsx";
 import ProfileSettings from "./pages/company/settings/ProfilesSettings.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const ProtectedRoute = () => {
   const session = useAuthStore((state) => state.session);
@@ -128,10 +131,19 @@ const AppRouterWrapper = () => {
               <Route index element={<SettingsOverview />} />
               <Route path="overview" element={<SettingsOverview />} />
               <Route path="profiles" element={<ProfileSettings />} />
-              <Route path="hrm" element={<HRMSettings />} />
+              <Route element={<HRMSettingsLayout />} >
+              <Route path="departments" element={<DepartmentSettings />} />
+              <Route path="Job-titles" element={<JobTitlesSettings />} />
+              </Route>
             </Route>
+            {/* Catch all for undefined routes under /company/:companyId */}
+            <Route path="*" element={<NotFound />} />
           </Route>
+          {/* Catch all for undefined protected routes */}
+          <Route path="*" element={<NotFound />} />
         </Route>
+         {/* Catch all for public routes */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </HashRouter>
   );

@@ -24,7 +24,7 @@ export default function SettingsSidebar() {
     },
     {
       label: "HRM",
-      href: `/company/${companyId}/settings/hrm`,
+      href: `/company/${companyId}/settings/departments`,
       icon: Building2,
     }
   ];
