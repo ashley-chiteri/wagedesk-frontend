@@ -75,8 +75,8 @@ interface FloatingFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
 }
 
-// Reusable Floating Field with the "Border-Cut" style from your image
-function FloatingField({ label, ...props }: FloatingFieldProps) {
+// Reusable Floating Field with the "Border-Cut" style 
+export function FloatingField({ label, ...props }: FloatingFieldProps) {
   return (
     <div className="group relative mt-2">
       <Input

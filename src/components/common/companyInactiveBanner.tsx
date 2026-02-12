@@ -1,10 +1,9 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
-//import { Link } from "react-router-dom";
-import {
-  Mail,
+import { useNavigate } from "react-router-dom";
 
-} from "lucide-react";
+//import { Link } from "react-router-dom";
+import { Mail, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CompanyInactiveBannerProps {
@@ -16,6 +15,7 @@ const CompanyInactiveBanner: React.FC<CompanyInactiveBannerProps> = ({
   status = "pending",
   message,
 }) => {
+  const navigate = useNavigate();
   const formattedStatus =
     status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
@@ -39,8 +39,17 @@ const CompanyInactiveBanner: React.FC<CompanyInactiveBannerProps> = ({
         size="lg"
         className="px-8 font-medium shadow-md transition-all hover:shadow-lg active:scale-95 bg-[#1F3A8A] cursor-pointer"
       >
-         <Mail className="mr-2 h-4 w-4" />
-        Contact Support 
+        <Mail className="mr-2 h-4 w-4" />
+        Contact Support
+      </Button>
+
+      <Button
+        variant="ghost"
+       className="text-muted-foreground hover:text-foreground p-0 h-auto cursor-pointer"
+        onClick={() => navigate("/dashboard")}
+      >
+        <ChevronLeft className="mr-1 h-4 w-4" />
+        Back to Dashboard
       </Button>
     </div>
   );

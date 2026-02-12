@@ -25,14 +25,15 @@ import {
 import { HelpCircle } from "lucide-react";
 
 const CompanyTopBar: React.FC = () => {
-  const { user, logout, activeWorkspace } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { companyId } = useParams();
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const navigate = useNavigate();
+   const { companies: companyMemberships } = useAuthStore();
 
-  const companies = useMemo(() => {
-    return activeWorkspace?.workspaces?.companies || [];
-  }, [activeWorkspace]);
+ const companies = useMemo(() => {
+    return companyMemberships.map((m) => m.companies);
+  }, [companyMemberships]);
 
   useEffect(() => {
     // Find the company with the matching ID

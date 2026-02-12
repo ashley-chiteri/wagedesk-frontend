@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface FloatingFieldProps {
   label: string;
@@ -56,6 +57,156 @@ type ToggleRowProps = {
   onChange: (checked: boolean) => void;
 };
 
+// Add these to your employeeutils.tsx file
+
+interface BorderFloatingFieldProps {
+  label: string;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: React.HTMLInputTypeAttribute;
+  required?: boolean;
+  error?: string;
+  disabled?: boolean;
+}
+
+export const BorderFloatingField: React.FC<BorderFloatingFieldProps> = ({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+  error,
+  disabled = false,
+}) => {
+  const hasValue = value !== "" && value !== null && value !== undefined;
+
+  return (
+    <div className="relative mb-6">
+      <div
+        className={cn(
+          "relative border rounded-md transition-all bg-white",
+          error
+            ? "border-rose-500"
+            : disabled
+              ? "border-slate-200 bg-slate-50"
+              : "border-slate-300 hover:border-slate-400 focus-within:border-blue-600",
+        )}
+      >
+        <Input
+          type={type}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder=""
+          className={cn(
+            "peer h-12 px-3 pt-4 pb-1 bg-transparent border-none shadow-none focus-visible:ring-0",
+            disabled && "cursor-not-allowed opacity-70",
+          )}
+        />
+        <Label
+          className={cn(
+            "absolute left-3 top-3 px-1 text-slate-500 transition-all cursor-text bg-transparent",
+            "peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white",
+            hasValue && "-top-2 text-xs text-slate-600 bg-white",
+            disabled && "opacity-70",
+          )}
+        >
+          {label} {required && <span className="text-rose-500">*</span>}
+        </Label>
+      </div>
+      {error && <p className="text-xs text-rose-500 mt-1.5">{error}</p>}
+    </div>
+  );
+};
+
+interface BorderSelectOption {
+  label: string;
+  value: string;
+}
+
+interface BorderFloatingSelectProps {
+  label: string;
+  value: string;
+  options: BorderSelectOption[];
+  onChange: (value: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+}
+
+export const BorderFloatingSelect: React.FC<BorderFloatingSelectProps> = ({
+  label,
+  value,
+  options,
+  onChange,
+  required = false,
+  disabled = false,
+  error,
+}) => {
+  const hasValue = value !== "" && value !== null && value !== undefined;
+
+  return (
+    <div className="relative mb-6">
+      <div
+        className={cn(
+          "relative border rounded-md transition-all bg-white",
+          error
+            ? "border-rose-500"
+            : disabled
+              ? "border-slate-200 bg-slate-50"
+              : "border-slate-300 hover:border-slate-400 focus-within:border-blue-600",
+        )}
+      >
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className={cn(
+            "peer w-full h-12 px-3 pt-4 pb-1 text-slate-900 bg-transparent border-none rounded-md appearance-none focus:outline-none focus:ring-0",
+            "cursor-pointer",
+            !hasValue && "text-slate-400",
+            disabled && "cursor-not-allowed opacity-70 text-slate-500",
+          )}
+          style={{
+            WebkitAppearance: 'none',
+            MozAppearance: 'none',
+          }}
+        >
+          <option value="" disabled hidden></option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value} className="text-slate-900">
+              {option.label}
+            </option>
+          ))}
+        </select>
+        
+        {/* Custom dropdown arrow */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <svg 
+            className={cn("w-4 h-4", disabled ? "text-slate-400" : "text-slate-500")} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        <Label
+          className={cn(
+            "absolute left-3 top-3 px-1 text-slate-500 transition-all pointer-events-none bg-transparent",
+            "peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white",
+            (hasValue || value) && "-top-2 text-xs text-slate-600 bg-white",
+            disabled && "opacity-70",
+          )}
+        >
+          {label} {required && <span className="text-rose-500">*</span>}
+        </Label>
+      </div>
+      {error && <p className="text-xs text-rose-500 mt-1.5">{error}</p>}
+    </div>
+  );
+};
 
 export const FloatingField: React.FC<FloatingFieldProps> = ({
   label,
@@ -253,7 +404,9 @@ export function SectionDetailsHeader({ title, description, icon: Icon }: { title
 
 export function EditButton() {
   return (
-    <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-all shadow-none">
+    <button 
+    onClick={() => toast.info("Editing is disabled for the demo")}
+    className="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-all shadow-none">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
       Edit
     </button>

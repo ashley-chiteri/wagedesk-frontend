@@ -58,30 +58,45 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <Link to={`/company/${company.id}/settings`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  View Settings
-                </DropdownMenuItem>
-              </Link>
-              <Link to={`/company/${company.id}/employees`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  Manage Employees
-                </DropdownMenuItem>
-              </Link>
-              <Link to={`/company/${company.id}/payroll/run`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  Run Payroll
-                </DropdownMenuItem>
-              </Link>
-              {role !== "Viewer" && (
-                <Link to={`/company/${company.id}/reports/overview/statutory`}>
+            {status === "APPROVED" ?
+              (<DropdownMenuContent align="end">
+                <Link to={`/company/${company.id}/settings`}>
                   <DropdownMenuItem className="cursor-pointer">
-                    View Reports
+                    View Settings
                   </DropdownMenuItem>
                 </Link>
-              )}
-            </DropdownMenuContent>
+                <Link to={`/company/${company.id}/employees`}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Manage Employees
+                  </DropdownMenuItem>
+                </Link>
+                <Link to={`/company/${company.id}/payroll/run`}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Run Payroll
+                  </DropdownMenuItem>
+                </Link>
+                {role !== "Viewer" && (
+                  <Link
+                    to={`/company/${company.id}/reports/overview/statutory`}
+                  >
+                    <DropdownMenuItem className="cursor-pointer">
+                      View Reports
+                    </DropdownMenuItem>
+                  </Link>
+                )}
+                 <Link to={`/company/${company.id}/payroll/setup`}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Payroll setup
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>) : (
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="cursor-pointer">
+                    Not Authorized
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              )
+            }
           </DropdownMenu>
         </div>
 

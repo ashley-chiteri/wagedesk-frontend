@@ -7,7 +7,7 @@ import {
   Mail,
   Plus,
   SearchX,
-  Search
+  Search,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
@@ -20,12 +20,14 @@ import { Input } from "@/components/ui/input";
 const RootDashboard = () => {
   const { activeWorkspace, isWorkspacePending, isWorkspaceSuspended, loading } =
     useAuthStore();
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
+  const { companies: companyMemberships } = useAuthStore();
 
   const companies = useMemo(() => {
-    return activeWorkspace?.workspaces?.companies || [];
-  }, [activeWorkspace]);
+    return companyMemberships.map((m) => m.companies);
+  }, [companyMemberships]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const filteredCompanies = useMemo(() => {
     return companies.filter(

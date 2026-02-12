@@ -28,8 +28,9 @@ import companyLogo from "@/assets/WD-BG-WHITE-LOGO.png";
 const TopBar: React.FC = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { activeWorkspace } = useAuthStore();
 
-  const fullName = useAuthStore.getState().activeWorkspace?.full_names || "";
+  const fullName = activeWorkspace?.full_names ?? "";
   const firstName = fullName.split(" ")[0] || "User";
   const userEmail = user?.email || "No email";
 

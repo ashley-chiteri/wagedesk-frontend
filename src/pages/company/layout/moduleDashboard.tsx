@@ -9,10 +9,11 @@ const ModuleDashboard = () => {
   const { activeWorkspace } = useAuthStore();
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const { companyId } = useParams();
+  const { companies: companyMemberships } = useAuthStore();
 
-  const companies = useMemo(() => {
-    return activeWorkspace?.workspaces?.companies || [];
-  }, [activeWorkspace]);
+ const companies = useMemo(() => {
+    return companyMemberships.map((m) => m.companies);
+  }, [companyMemberships]);
 
   useEffect(() => {
     const foundCompany = companies.find((c) => c.id === companyId);

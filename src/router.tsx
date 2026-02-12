@@ -24,6 +24,7 @@ import PayrollHistory from "./pages/company/payroll/PayrollHistory.tsx";
 import PayrollSettings from "./pages/company/payroll/PayrollSettings.tsx";
 import SendPayslip from "./pages/company/payroll/SendPayslips.tsx";
 import PayrollOverview from "./pages/company/payroll/payrollOverview.tsx";
+import PayrollSetup from "./components/payroll/settings/PayrollSetup.tsx";
 import ReportLayout from "./pages/company/reports/ReportLayout.tsx";
 import ReportOverview from "./pages/company/reports/ReportOverview.tsx";
 import OverviewLayout from "./pages/company/reports/OverviewLayout.tsx";
@@ -101,6 +102,7 @@ const AppRouterWrapper = () => {
               <Route path="allowances" element={<EmployeeAllowances />} />
             </Route>
             {/**Payroll specific dashboards */}
+
             <Route path="payroll" element={<PayrollLayout />}>
               <Route index element={<PayrollOverview />} />
               <Route path="run" element={<RunPayroll />} />
@@ -108,6 +110,7 @@ const AppRouterWrapper = () => {
               <Route path="history" element={<PayrollHistory />} />
               <Route path="settings" element={<PayrollSettings />} />
             </Route>
+            <Route path ="payroll/setup" element={<PayrollSetup/>}/>
             {/**Report specific dashboards */}
             <Route path="reports" element={<ReportLayout />}>
               <Route index element={<ReportOverview />} />

@@ -7,12 +7,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { API_BASE_URL } from "@/config";
-import { Input } from "@/components/ui/input";
+//import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { useParams } from "react-router-dom";
+import { FloatingField } from "../dashboard/CompanyProfileForm";
 
 interface Props {
   open: boolean;
@@ -33,9 +34,7 @@ const EmailComposeDialog: React.FC<Props> = ({
   const { companyId } = useParams();
   const session = useAuthStore.getState().session;
 
-
   const handleSend = async () => {
-
     //if(!enabled) return toast.info("Featured disabled")
     const toastId = toast.loading(
       mode === "bulk"
@@ -44,19 +43,24 @@ const EmailComposeDialog: React.FC<Props> = ({
     );
 
     try {
-      const res = await fetch(`${API_BASE_URL}/company/${companyId}/employees/email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
+      const res = await fetch(
+        `${API_BASE_URL}/company/${companyId}/employees/email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            recipients:
+              mode === "single"
+                ? to.split(",").map((e) => e.trim())
+                : recipients,
+            subject,
+            body,
+          }),
         },
-        body: JSON.stringify({
-          recipients:
-            mode === "single" ? to.split(",").map((e) => e.trim()) : recipients,
-          subject,
-          body,
-        }),
-      });
+      );
 
       if (!res.ok) throw new Error("Failed");
 
@@ -91,10 +95,12 @@ const EmailComposeDialog: React.FC<Props> = ({
 
         <div className="space-y-3">
           {mode === "single" ? (
-            <Input
+            <FloatingField
+              label="Recipient"
               value={to}
               onChange={(e) => setTo(e.target.value)}
               placeholder="Recipient email"
+              required
             />
           ) : (
             <div className="text-xs text-slate-500">
@@ -104,10 +110,10 @@ const EmailComposeDialog: React.FC<Props> = ({
             </div>
           )}
 
-          <Input
+          <FloatingField
+            label="Subject"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Subject"
           />
 
           <Textarea

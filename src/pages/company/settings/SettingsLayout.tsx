@@ -37,13 +37,7 @@ export default function SettingsLayout() {
                   <p>Back</p>
                 </TooltipContent>
             </Tooltip>
-
-            <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
           </div>
-
-          <p className="text-sm text-slate-00 pl-11 mt-1">
-            Configure Organization and manage users.
-          </p>
         </header>
 
         {/* Scrollable content */}

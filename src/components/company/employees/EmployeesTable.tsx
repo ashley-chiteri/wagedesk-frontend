@@ -49,18 +49,21 @@ interface EmailDialogState {
   mode: EmailMode;
   recipients: string[]; // emails
 }
+const toProperCase = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 const EmployeeStatusBadge = ({ status }: { status: string }) => {
   const getVariant = (status: string) => {
     switch (status) {
-      case "ACTIVE":
-        return "bg-emerald-50 text-emerald-700 border-emerald-100";
+      case "Active":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "On Leave":
-        return "bg-amber-50 text-amber-700 border-amber-100";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       case "Terminated":
-        return "bg-rose-50 text-rose-700 border-rose-100";
+        return "bg-rose-50 text-rose-700 border-rose-200";
       default:
-        return "bg-slate-50 text-slate-700 border-slate-100";
+        return "bg-slate-50 text-slate-700 border-slate-200";
     }
   };
   return (
@@ -251,7 +254,7 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error,  onDeleteSucces
       accessorKey: "employee_status",
       header: "Status",
       cell: ({ row }) => (
-        <EmployeeStatusBadge status={row.getValue("employee_status")} />
+        <EmployeeStatusBadge status={toProperCase(row.getValue("employee_status"))}/>
       ),
     },
     {

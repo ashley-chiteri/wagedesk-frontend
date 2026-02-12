@@ -14,10 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+/*
 const toProperCase = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
+}; */
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -33,14 +33,12 @@ const LoginPage = () => {
     try {
       await login(email, password);
       const state = useAuthStore.getState();
-      const role = toProperCase(state.activeWorkspace?.role || "User");
-      console.log (state.activeWorkspace)
-     if (role) {
-      toast.success(`Logged in as ${role}`);
-    } else {
-      toast.info("Logged in, but no workspace found.");
-    }
-      navigate("/dashboard"); 
+      if (state.workspaces.length > 0) {
+        toast.success("Login successful");
+      } else {
+        toast.info("Logged in, but no workspace found.");
+      }
+      navigate("/dashboard");
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message);
