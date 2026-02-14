@@ -21,7 +21,12 @@ import EmployeeAllowances from "./pages/company/employees/details/Allowances.tsx
 import PayrollLayout from "./pages/company/payroll/PayrollLayout.tsx";
 import RunPayroll from "./pages/company/payroll/runPayroll.tsx";
 import PayrollHistory from "./pages/company/payroll/PayrollHistory.tsx";
-import PayrollSettings from "./pages/company/payroll/PayrollSettings.tsx";
+import BenefitSettings from "./pages/company/payroll/settings/benefitSettings.tsx";
+import PayrollSettingsLayout from "./pages/company/payroll/settings/PayrollSettingsLayout.tsx";
+import PayrollWizard from "./components/payroll/runs/PayrollWizard.tsx";
+import PayrollReviewStatus from "./components/payroll/runs/PayrollReviewStatus.tsx";
+import DeductionSettings from "./pages/company/payroll/settings/deductionSettings.tsx";
+import Reviewers from "./pages/company/payroll/settings/reviewers.tsx";
 import SendPayslip from "./pages/company/payroll/SendPayslips.tsx";
 import PayrollOverview from "./pages/company/payroll/payrollOverview.tsx";
 import PayrollSetup from "./components/payroll/settings/PayrollSetup.tsx";
@@ -96,12 +101,15 @@ const AppRouterWrapper = () => {
             <Route path="employees" element={<EmployeeSection />} />
             <Route path="employees/add-employee" element={<AddEmployees />} />
             {/* Employee details */}
-            <Route path="employees/:employeeId" element={<EmployeeDetailsLayout />}>
+            <Route
+              path="employees/:employeeId"
+              element={<EmployeeDetailsLayout />}
+            >
               <Route index element={<PersonalDetails />} />
               <Route path="personal" element={<PersonalDetails />} />
               <Route path="contracts" element={<ContractDetails />} />
               <Route path="payments" element={<PaymentDetails />} />
-              <Route path="deductions" element={<EmployeeDeductions/>} />
+              <Route path="deductions" element={<EmployeeDeductions />} />
               <Route path="allowances" element={<EmployeeAllowances />} />
             </Route>
             {/**Payroll specific dashboards */}
@@ -111,9 +119,18 @@ const AppRouterWrapper = () => {
               <Route path="run" element={<RunPayroll />} />
               <Route path="payslips" element={<SendPayslip />} />
               <Route path="history" element={<PayrollHistory />} />
-              <Route path="settings" element={<PayrollSettings />} />
+              <Route path="settings" element={<PayrollSettingsLayout />}>
+                <Route index element={<BenefitSettings />} />
+                <Route path="benefits" element={<BenefitSettings />} />
+                <Route path="deductions" element={<DeductionSettings />} />
+                <Route path="reviewers" element={<Reviewers />} />
+              </Route>              
             </Route>
-            <Route path ="payroll/setup" element={<PayrollSetup/>}/>
+            <Route path="payroll/:payrollRunId">
+                <Route path="wizard" element={<PayrollWizard />} />
+                <Route path="review-status" element={<PayrollReviewStatus />} />
+              </Route>
+            <Route path="payroll/setup" element={<PayrollSetup />} />
             {/**Report specific dashboards */}
             <Route path="reports" element={<ReportLayout />}>
               <Route index element={<ReportOverview />} />
@@ -131,9 +148,9 @@ const AppRouterWrapper = () => {
               <Route index element={<SettingsOverview />} />
               <Route path="overview" element={<SettingsOverview />} />
               <Route path="profiles" element={<ProfileSettings />} />
-              <Route element={<HRMSettingsLayout />} >
-              <Route path="departments" element={<DepartmentSettings />} />
-              <Route path="Job-titles" element={<JobTitlesSettings />} />
+              <Route element={<HRMSettingsLayout />}>
+                <Route path="departments" element={<DepartmentSettings />} />
+                <Route path="Job-titles" element={<JobTitlesSettings />} />
               </Route>
             </Route>
             {/* Catch all for undefined routes under /company/:companyId */}
@@ -142,7 +159,7 @@ const AppRouterWrapper = () => {
           {/* Catch all for undefined protected routes */}
           <Route path="*" element={<NotFound />} />
         </Route>
-         {/* Catch all for public routes */}
+        {/* Catch all for public routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </HashRouter>

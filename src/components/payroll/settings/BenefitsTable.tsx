@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Pencil, Trash2, Plus, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, CircleOff } from "lucide-react";
 
 import {
   Table,
@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -23,6 +22,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -32,12 +33,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogFooter,
+  AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 import {
   BorderFloatingField,
   BorderFloatingSelect,
 } from "@/components/company/employees/employeeutils";
-// Add cn utility if not already imported
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -67,7 +68,6 @@ export function AllowanceTable({ companyId }: Props) {
   const [deleteItem, setDeleteItem] = useState<AllowanceType | null>(null);
   const session = useAuthStore.getState().session;
 
-  // Add fetch function similar to deductions table
   const fetchAllowances = useCallback(async () => {
     try {
       setLoading(true);
@@ -76,7 +76,7 @@ export function AllowanceTable({ companyId }: Props) {
         `${API_BASE_URL}/company/${companyId}/allowance-types`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
       const result = await response.json();
       setData(Array.isArray(result) ? result : []);
@@ -98,6 +98,7 @@ export function AllowanceTable({ companyId }: Props) {
     const url = isEditing
       ? `${API_BASE_URL}/company/${companyId}/allowance-types/${editingItem.id}`
       : `${API_BASE_URL}/company/${companyId}/allowance-types`;
+
     try {
       const response = await fetch(url, {
         method: isEditing ? "PUT" : "POST",
@@ -107,11 +108,12 @@ export function AllowanceTable({ companyId }: Props) {
         },
         body: JSON.stringify(values),
       });
+
       if (response.ok) {
         toast.success(isEditing ? "Allowance updated" : "Allowance created");
         setOpenDialog(false);
         setEditingItem(null);
-        fetchAllowances(); // Refresh table
+        fetchAllowances();
       } else {
         const err = await response.json();
         toast.error(err.error || "Operation failed");
@@ -119,80 +121,105 @@ export function AllowanceTable({ companyId }: Props) {
     } catch (error) {
       toast.error("Failed to save allowance");
       console.error("Save error:", error);
-    } finally {
-      setEditingItem(null);
-      setOpenDialog(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-      const token = session?.access_token
-  
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/company/${companyId}/allowance-types/${id}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-  
-        if (response.ok) {
-          toast.success("Allowance deleted successfully");
-          fetchAllowances();
-        } else {
-          const err = await response.json();
-          toast.error(err.error || "Could not allowace deduction");
+    const token = session?.access_token;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/company/${companyId}/allowance-types/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
         }
-      } catch (error) {
-        toast.error("Failed to delete");
+      );
+
+      if (response.ok) {
+        toast.success("Allowance deleted successfully");
+        fetchAllowances();
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Could not delete allowance");
       }
-    };
+    } catch (error) {
+      toast.error("Failed to delete allowance");
+    }
+  };
 
   const columns: ColumnDef<AllowanceType>[] = [
     {
       accessorKey: "name",
       header: "Allowance",
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-slate-900">{row.original.name}</span>
+          {row.original.description && (
+            <span className="text-xs text-slate-500 truncate max-w-50">
+              {row.original.description}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "code",
+      header: "Code",
+      cell: ({ row }) => (
+        <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded-md">
+          {row.original.code}
+        </span>
+      ),
     },
     {
       header: "Type",
-      cell: ({ row }) =>
-        row.original.is_cash ? (
-          <span className="text-slate-700 text-xs font-medium">
-            Cash Allowance
-          </span>
-        ) : (
-          <span className="text-slate-500 text-xs font-medium">
-            Non-Cash Benefit
-          </span>
-        ),
+      cell: ({ row }) => (
+        <span
+          className={cn(
+            "text-xs font-medium px-2.5 py-1.5 rounded-md",
+            row.original.is_cash
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : "bg-purple-50 text-purple-700 border border-purple-200"
+          )}
+        >
+          {row.original.is_cash ? "Cash" : "Non-Cash"}
+        </span>
+      ),
     },
     {
-      header: "Taxable",
-      cell: ({ row }) =>
-        row.original.is_taxable ? (
-          <span className="text-green-600 text-xs font-medium bg-green-50 px-2 py-1 rounded-md">
-            Taxable
-          </span>
-        ) : (
-          <span className="text-slate-400 text-xs font-medium bg-slate-50 px-2 py-1 rounded-md">
-            Non-Taxable
-          </span>
-        ),
+      header: "Tax Status",
+      cell: ({ row }) => (
+        <span
+          className={cn(
+            "text-xs font-medium px-2.5 py-1.5 rounded-md",
+            row.original.is_taxable
+              ? "bg-amber-50 text-amber-700 border border-amber-200"
+              : "bg-slate-50 text-slate-600 border border-slate-200"
+          )}
+        >
+          {row.original.is_taxable ? "Taxable" : "Non-Taxable"}
+        </span>
+      ),
     },
     {
       header: "Max Limit",
       cell: ({ row }) =>
-        row.original.has_maximum_value
-          ? `KES ${Number(row.original.maximum_value).toLocaleString()}`
-          : "—",
+        row.original.has_maximum_value ? (
+          <span className="font-mono text-sm font-medium">
+            KES {Number(row.original.maximum_value).toLocaleString()}
+          </span>
+        ) : (
+          <span className="text-slate-400 text-sm">—</span>
+        ),
     },
     {
       id: "actions",
+      header: "",
       cell: ({ row }) => {
         const item = row.original;
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-1">
             <Button
               variant="ghost"
               size="icon"
@@ -200,16 +227,15 @@ export function AllowanceTable({ companyId }: Props) {
                 setEditingItem(item);
                 setOpenDialog(true);
               }}
-              className="hover:bg-slate-100"
+              className="h-8 w-8 hover:bg-slate-100"
             >
-              <Pencil className="h-4 w-4 text-slate-500" />
+              <Pencil className="h-4 w-4 text-slate-600" />
             </Button>
-
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setDeleteItem(item)}
-              className="hover:bg-red-50"
+              className="h-8 w-8 hover:bg-red-50"
             >
               <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
@@ -225,13 +251,6 @@ export function AllowanceTable({ companyId }: Props) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if(loading) {
-    <div className="flex flex-col items-center gap-2 text-slate-500">
-        <Loader2 className="h-6 w-6 animate-spin text-[#1F3A8A]" />
-        <p className="text-sm font-medium">Fetching deductions...</p>
-      </div>
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
@@ -240,31 +259,24 @@ export function AllowanceTable({ companyId }: Props) {
             setEditingItem(null);
             setOpenDialog(true);
           }}
-          className="bg-[#1F3A8A] hover:bg-[#162a63] rounded-md h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
+          className="bg-[#1F3A8A] hover:bg-[#162a63] cursor-pointer rounded-md h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Allowance
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden shadow-none">
+      <div className="border border-slate-200 rounded-lg px-2 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-slate-50">
             {table.getHeaderGroups().map((hg) => (
-              <TableRow
-                key={hg.id}
-                className="hover:bg-transparent border-b border-slate-200"
-              >
+              <TableRow key={hg.id} className="hover:bg-transparent border-b border-slate-200">
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-xs font-medium text-slate-500 uppercase"
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider py-4"
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -272,32 +284,50 @@ export function AllowanceTable({ companyId }: Props) {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="relative">
+                      <Loader2 className="h-8 w-8 animate-spin text-[#1F3A8A]" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-3 w-3 bg-[#1F3A8A]/20 rounded-full" />
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-slate-600">
+                      Loading allowances...
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="hover:bg-slate-50/50 transition-colors border-b border-slate-100"
+                  className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                    <TableCell key={cell.id} className="py-4">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center text-slate-400"
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm">
-                      No allowances configured yet.
-                    </span>
+                <TableCell colSpan={columns.length} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="bg-slate-100 p-3 rounded-full">
+                      <CircleOff className="h-6 w-6 text-slate-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">
+                        No allowances configured
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Get started by adding your first allowance type
+                      </p>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
@@ -305,7 +335,7 @@ export function AllowanceTable({ companyId }: Props) {
                         setEditingItem(null);
                         setOpenDialog(true);
                       }}
-                      className="mt-2 border-slate-300 text-slate-600 hover:bg-slate-50"
+                      className="mt-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                     >
                       <Plus className="mr-2 h-3 w-3" />
                       Add your first allowance
@@ -325,27 +355,27 @@ export function AllowanceTable({ companyId }: Props) {
         onSave={handleSave}
       />
 
-      {/* Delete dialog */}
       <AlertDialog open={!!deleteItem} onOpenChange={() => setDeleteItem(null)}>
-        <AlertDialogContent className="rounded-lg border-slate-200 shadow-none">
+        <AlertDialogContent className="rounded-lg border-slate-200 shadow-lg max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg text-slate-900">
-              Delete allowance?
+              Delete allowance type?
             </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-slate-500">
+              This action cannot be undone. This will permanently delete the{" "}
+              <span className="font-medium text-slate-700">{deleteItem?.name}</span>{" "}
+              allowance and may affect existing payroll calculations.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <p className="text-sm text-slate-500">
-            This action cannot be undone. This will permanently delete the
-            allowance.
-          </p>
-          <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel className="border-slate-300 hover:bg-slate-50 rounded-md">
+          <AlertDialogFooter className="mt-4 gap-2">
+            <AlertDialogCancel className="border-slate-300 hover:bg-slate-50 hover:text-slate-900 rounded-md">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteItem && handleDelete(deleteItem.id)}
               className="bg-red-600 hover:bg-red-700 text-white rounded-md"
             >
-              Delete
+              Delete Allowance
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -354,6 +384,7 @@ export function AllowanceTable({ companyId }: Props) {
   );
 }
 
+// ============= DIALOG COMPONENT =============
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -361,13 +392,7 @@ interface DialogProps {
   onSave: (values: Omit<AllowanceType, "id">) => void;
 }
 
-function AllowanceDialog({
-  open,
-  onOpenChange,
-  initialData,
-  onSave,
-}: DialogProps) {
-
+function AllowanceDialog({ open, onOpenChange, initialData, onSave }: DialogProps) {
   const nonCashOptions = [
     { label: "Car Benefit", value: "CAR" },
     { label: "Meal Benefit", value: "MEAL" },
@@ -383,7 +408,6 @@ function AllowanceDialog({
   const [hasMaximum, setHasMaximum] = React.useState(false);
   const [maximumValue, setMaximumValue] = React.useState<number | "">("");
 
-  // Reset or set initial data
   React.useEffect(() => {
     if (initialData) {
       setIsCash(initialData.is_cash);
@@ -408,13 +432,12 @@ function AllowanceDialog({
     setMaximumValue("");
   };
 
-  // 🔹 Auto rules
   React.useEffect(() => {
     if (isCash) {
-      setIsTaxable(true); // Cash always taxable
+      setIsTaxable(true);
       setSelectedCode("CASH");
     } else {
-      setSelectedCode(""); // Reset selection when switching to non-cash
+      setSelectedCode("");
     }
   }, [isCash]);
 
@@ -427,19 +450,36 @@ function AllowanceDialog({
   }, [selectedCode, isCash]);
 
   const handleSubmit = () => {
-    if (!isCash && !selectedCode) return;
-    if (!isCash && selectedCode === "OTHER" && !name.trim()) return;
-    if (isCash && !name.trim()) return;
+    // Validation
+    if (!isCash && !selectedCode) {
+      toast.error("Please select a benefit type");
+      return;
+    }
+
+    if (!isCash && selectedCode === "OTHER" && !name.trim()) {
+      toast.error("Please enter a benefit name");
+      return;
+    }
+
+    if (isCash && !name.trim()) {
+      toast.error("Please enter an allowance name");
+      return;
+    }
+
+    if (hasMaximum && (!maximumValue || Number(maximumValue) <= 0)) {
+      toast.error("Please enter a valid maximum amount");
+      return;
+    }
 
     const finalName = isCash
-      ? name
+      ? name.trim()
       : selectedCode === "OTHER"
-        ? name
-        : nonCashOptions.find((o) => o.value === selectedCode)?.label || "";
+      ? name.trim()
+      : nonCashOptions.find((o) => o.value === selectedCode)?.label || "";
 
     onSave({
       name: finalName,
-      description: description || null,
+      description: description.trim() || null,
       is_cash: isCash,
       is_taxable: isTaxable,
       has_maximum_value: hasMaximum,
@@ -451,21 +491,31 @@ function AllowanceDialog({
     resetForm();
   };
 
-  const isLocked =
-    !isCash && (selectedCode === "CAR" || selectedCode === "HOUSING");
+  const isLocked = !isCash && (selectedCode === "CAR" || selectedCode === "HOUSING");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-lg border-slate-200 p-6 shadow-none">
-        <DialogHeader className="pb-4 border-b border-slate-100">
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        onOpenChange(isOpen);
+        if (!isOpen) resetForm();
+      }}
+    >
+      <DialogContent className="sm:max-w-lg rounded-lg border-slate-200 p-0 gap-0 shadow-lg">
+        <DialogHeader className="p-6 pb-4 border-b border-slate-100">
           <DialogTitle className="text-lg font-semibold text-slate-900">
             {initialData ? "Edit Allowance" : "Add New Allowance"}
           </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
+            {initialData
+              ? "Update the allowance type details below"
+              : "Configure a new allowance type for your organization"}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 mt-2">
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {/* Cash/Non-Cash Toggle */}
-          <div className="flex gap-3 p-1 bg-slate-50 rounded-md border border-slate-200">
+          <div className="flex gap-2 p-1 bg-slate-50 rounded-lg border border-slate-200">
             <Button
               type="button"
               variant={isCash ? "default" : "ghost"}
@@ -473,8 +523,8 @@ function AllowanceDialog({
               className={cn(
                 "flex-1 h-9 text-sm font-medium rounded-md transition-all",
                 isCash
-                  ? "bg-white text-slate-900 border border-slate-300 shadow-none hover:bg-white"
-                  : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent",
+                  ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                  : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
               )}
             >
               Cash Allowance
@@ -486,15 +536,15 @@ function AllowanceDialog({
               className={cn(
                 "flex-1 h-9 text-sm font-medium rounded-md transition-all",
                 !isCash
-                  ? "bg-white text-slate-900 border border-slate-300 shadow-none hover:bg-white"
-                  : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent",
+                  ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                  : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
               )}
             >
               Non-Cash Benefit
             </Button>
           </div>
 
-          {/* CASH FLOW */}
+          {/* Cash Flow */}
           {isCash && (
             <>
               <BorderFloatingField
@@ -510,16 +560,16 @@ function AllowanceDialog({
                 onChange={(e) => setDescription(e.target.value)}
               />
 
-              <div className="bg-blue-50/50 border border-blue-100 rounded-md p-3">
+              <div className="bg-blue-50/80 border border-blue-200 rounded-lg p-3">
                 <p className="text-xs text-blue-700 flex items-center gap-2">
-                  <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                  Cash allowances are always taxable by KRA regulations.
+                  <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                  Cash allowances are always taxable under KRA regulations
                 </p>
               </div>
             </>
           )}
 
-          {/* NON-CASH FLOW */}
+          {/* Non-Cash Flow */}
           {!isCash && (
             <>
               <BorderFloatingSelect
@@ -548,20 +598,19 @@ function AllowanceDialog({
               )}
 
               {selectedCode === "MEAL" && (
-                <div className="bg-amber-50/50 border border-amber-200 rounded-md p-3">
+                <div className="bg-amber-50/80 border border-amber-200 rounded-lg p-3">
                   <p className="text-xs text-amber-700 flex items-center gap-2">
-                    <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                    First KES 5,000 is tax-exempt. Excess will be taxed at
-                    applicable rates.
+                    <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                    First KES 5,000 is tax-exempt. Excess amounts are taxable
                   </p>
                 </div>
               )}
 
               {selectedCode === "CAR" && (
-                <div className="bg-blue-50/50 border border-blue-100 rounded-md p-3">
+                <div className="bg-blue-50/80 border border-blue-200 rounded-lg p-3">
                   <p className="text-xs text-blue-700 flex items-center gap-2">
-                    <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                    Car benefit is taxable based on KRA prescribed rates.
+                    <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                    Car benefit is taxable based on KRA prescribed rates
                   </p>
                 </div>
               )}
@@ -571,8 +620,8 @@ function AllowanceDialog({
           {/* Taxable Toggle */}
           <div
             className={cn(
-              "flex items-center justify-between border rounded-md p-3 bg-white",
-              isCash || isLocked ? "border-slate-200" : "border-slate-200",
+              "flex items-center justify-between border rounded-lg p-4 bg-white",
+              isCash || isLocked ? "border-slate-200 bg-slate-50/50" : "border-slate-200"
             )}
           >
             <div className="space-y-0.5">
@@ -589,24 +638,24 @@ function AllowanceDialog({
               checked={isTaxable}
               onCheckedChange={setIsTaxable}
               disabled={isCash || isLocked}
-              className="data-[state=checked]:bg-blue-600"
+              className="data-[state=checked]:bg-[#1F3A8A]"
             />
           </div>
 
-          {/* Maximum Limit */}
-          <div className="flex items-center justify-between border border-slate-200 rounded-md p-3 bg-white">
+          {/* Maximum Limit Toggle */}
+          <div className="flex items-center justify-between border border-slate-200 rounded-lg p-4 bg-white">
             <div className="space-y-0.5">
               <Label className="text-sm font-medium text-slate-700">
                 Has Maximum Limit
               </Label>
               <p className="text-xs text-slate-500">
-                Apply monthly allowance cap
+                Apply a monthly cap to this allowance
               </p>
             </div>
             <Switch
               checked={hasMaximum}
               onCheckedChange={setHasMaximum}
-              className="data-[state=checked]:bg-blue-600"
+              className="data-[state=checked]:bg-[#1F3A8A]"
             />
           </div>
 
@@ -622,24 +671,23 @@ function AllowanceDialog({
               required
             />
           )}
-
-          {/* Actions */}
-          <div className="flex justify-end pt-4 border-t border-slate-100 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="mr-3 border-slate-300 text-slate-700 hover:bg-slate-50 rounded-md h-10 px-4"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="bg-[#1F3A8A] hover:bg-[#162a63] px-6 rounded-md h-10 text-sm font-medium shadow-none"
-            >
-              {initialData ? "Update" : "Save"} Allowance
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter className="p-6 pt-4 border-t border-slate-100 bg-slate-50/50">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 rounded-md h-10 px-6"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="bg-[#1F3A8A] hover:bg-[#162a63] px-6 rounded-md h-10 text-sm font-medium shadow-sm"
+          >
+            {initialData ? "Update" : "Save"} Allowance
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -35,7 +35,7 @@ export default function PayrollSidebar() {
     },
     {
       label: "Settings",
-      href: `/company/${companyId}/payroll/settings`,
+      href: `/company/${companyId}/payroll/settings/benefits`,
       icon: Settings,
     },
   ];

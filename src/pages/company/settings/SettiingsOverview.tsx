@@ -219,7 +219,7 @@ export default function CompanySettingsOverviewPage() {
       <Separator className="bg-slate-100" />
 
       {/* Company Header Card - Minimal */}
-      <div className="flex items-start gap-6 p-6 bg-white border border-slate-100 rounded-lg">
+      <div className="flex items-start gap-6 p-6 bg-white border border-slate-300 rounded-lg">
         <Avatar className="h-16 w-16 rounded-lg border border-slate-100">
           <AvatarImage src={logoPreview || undefined} />
           <AvatarFallback className="rounded-lg bg-slate-50">
@@ -266,7 +266,7 @@ export default function CompanySettingsOverviewPage() {
 
       {/* Quick Stats - Minimal Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-100 rounded-lg p-5">
+        <div className="bg-white border border-slate-300 rounded-lg p-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-50 rounded-md">
               <Users className="h-4 w-4 text-blue-600" />
@@ -279,7 +279,7 @@ export default function CompanySettingsOverviewPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white border border-slate-100 rounded-lg p-5">
+        <div className="bg-white border border-slate-300 rounded-lg p-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-50 rounded-md">
               <Briefcase className="h-4 w-4 text-indigo-600" />
@@ -292,7 +292,7 @@ export default function CompanySettingsOverviewPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white border border-slate-100 rounded-lg p-5">
+        <div className="bg-white border border-slate-300 rounded-lg p-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-amber-50 rounded-md">
               <Calendar className="h-4 w-4 text-amber-600" />
@@ -331,7 +331,7 @@ export default function CompanySettingsOverviewPage() {
 
         <div className="mt-6">
           <TabsContent value="overview" className="space-y-6">
-            <div className="bg-white border border-slate-100 rounded-lg p-6">
+            <div className="bg-white border border-slate-300 rounded-lg p-6">
               <div className="mb-6">
                 <h3 className="text-base font-medium text-slate-900">
                   Company Profile
@@ -351,7 +351,7 @@ export default function CompanySettingsOverviewPage() {
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-6">
-            <div className="bg-white border border-slate-100 rounded-lg p-6">
+            <div className="bg-white border border-slate-300 rounded-lg p-6">
               <div className="mb-6">
                 <h3 className="text-base font-medium text-slate-900">
                   Statutory & Compliance
@@ -368,7 +368,7 @@ export default function CompanySettingsOverviewPage() {
           </TabsContent>
 
           <TabsContent value="banking" className="space-y-6">
-            <div className="bg-white border border-slate-100 rounded-lg p-6">
+            <div className="bg-white border border-slate-300 rounded-lg p-6">
               <div className="mb-6">
                 <h3 className="text-base font-medium text-slate-900">
                   Banking Details

@@ -20,8 +20,8 @@ export default function PayrollLayout() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 h-full  overflow-hidden">
         {/* Header */}
-        <header className="shrink-0 px-6 pt-5 pb-4  border-slate-200 ">
-          <div className="flex items-center gap-3">
+        <header className="shrink-0 pt-2 pb-1  border-slate-200 ">
+          <div className="flex items-center px-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -37,17 +37,11 @@ export default function PayrollLayout() {
                   <p>Back</p>
                 </TooltipContent>
             </Tooltip>
-
-            <h1 className="text-2xl font-semibold text-slate-900">Payroll</h1>
           </div>
-
-          <p className="text-sm text-slate-00 pl-11 mt-1">
-            Run payroll, send payslips, and manage payroll records.
-          </p>
         </header>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-4">
           <Outlet />
         </div>
       </div>
