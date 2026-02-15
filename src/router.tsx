@@ -32,9 +32,7 @@ import PayrollOverview from "./pages/company/payroll/payrollOverview.tsx";
 import PayrollSetup from "./components/payroll/settings/PayrollSetup.tsx";
 import ReportLayout from "./pages/company/reports/ReportLayout.tsx";
 import ReportOverview from "./pages/company/reports/ReportOverview.tsx";
-import OverviewLayout from "./pages/company/reports/OverviewLayout.tsx";
-import InternalReports from "./pages/company/reports/InternalReports.tsx";
-import PaymentsReports from "./pages/company/reports/PaymentsReport.tsx";
+import ReportPreviewPage from "./pages/company/reports/ReportPreviewPage.tsx";
 import AnnualReports from "./pages/company/reports/AnnualReports.tsx";
 import P9AReports from "./pages/company/reports/P9A-Reports.tsx";
 import SettingsLayout from "./pages/company/settings/SettingsLayout.tsx";
@@ -134,14 +132,10 @@ const AppRouterWrapper = () => {
             {/**Report specific dashboards */}
             <Route path="reports" element={<ReportLayout />}>
               <Route index element={<ReportOverview />} />
-              <Route path="overview" element={<OverviewLayout />}>
-                <Route path="statutory" element={<ReportOverview />} />
-                <Route path="payments" element={<PaymentsReports />} />
-                <Route path="internal" element={<InternalReports />} />
-              </Route>
               <Route path="overview" element={<ReportOverview />} />
               <Route path="annual" element={<AnnualReports />} />
               <Route path="p9a" element={<P9AReports />} />
+              <Route path="report-preview" element={<ReportPreviewPage />} />
             </Route>
             {/**Report specific dashboards */}
             <Route path="settings" element={<SettingsLayout />}>

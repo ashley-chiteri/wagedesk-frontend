@@ -229,9 +229,9 @@ export default function PayrollReviewStatus() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-slate-50">
-        <div className="space-y-6 max-w-7xl mx-auto p-6">
+        <div className="space-y-4 max-w-7xl mx-auto p-6">
           {/* Header with Navigation */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white rounded-sm border border-slate-300 shadow-none p-4">
             <div className="flex items-center gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -271,14 +271,14 @@ export default function PayrollReviewStatus() {
             <div className="flex items-center gap-3">
               <Badge 
                 variant="outline" 
-                className="px-3 py-1 text-sm font-medium border-slate-200"
+                className="px-3 py-1 text-sm font-medium border-slate-300"
               >
                 <TrendingUp className="h-3.5 w-3.5 mr-1 text-slate-500" />
                 {overallCompletion}% Complete
               </Badge>
               
               <Button 
-                className="bg-[#1F3A8A] hover:bg-[#162a63] cursor-pointer rounded-md h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
+                className="bg-[#1F3A8A] hover:bg-[#162a63] cursor-pointer rounded-sm h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
                 onClick={() => navigate(`/company/${companyId}/payroll/${payrollRunId}/wizard`)}
               >
                 Continue to Wizard 
@@ -290,7 +290,7 @@ export default function PayrollReviewStatus() {
           {/* Quick Stats Cards */}
           {steps.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border border-slate-200 rounded-md">
+              <Card className="border border-slate-300 rounded-sm shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -304,7 +304,7 @@ export default function PayrollReviewStatus() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-slate-200 rounded-md">
+              <Card className="border border-slate-300 rounded-sm shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -318,7 +318,7 @@ export default function PayrollReviewStatus() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-slate-200 rounded-md">
+              <Card className="border border-slate-300 rounded-sm shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -332,7 +332,7 @@ export default function PayrollReviewStatus() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-slate-200 rounded-md">
+              <Card className="border border-slate-300 rounded-sm shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -349,8 +349,8 @@ export default function PayrollReviewStatus() {
           )}
 
           {/* Reviewers Table */}
-          <Card className="  border border-slate-200 shadow-none rounded-md px-2">
-            <CardHeader className="border-b border-slate-200">
+          <Card className="  border border-slate-300 shadow-none rounded-sm px-2">
+            <CardHeader className="border-b border-slate-300">
               <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900">
                 <div className="h-8 w-8 rounded-md bg-slate-100 flex items-center justify-center">
                   <ShieldCheck className="h-4 w-4 text-slate-600" />
@@ -478,7 +478,7 @@ export default function PayrollReviewStatus() {
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-16">
                         <div className="flex flex-col items-center gap-4">
-                          <div className="h-20 w-20 rounded-md bg-slate-100 flex items-center justify-center">
+                          <div className="h-20 w-20 rounded-sm bg-slate-100 flex items-center justify-center">
                             <ShieldCheck className="h-10 w-10 text-slate-400" />
                           </div>
                           <div className="space-y-2">
@@ -507,7 +507,7 @@ export default function PayrollReviewStatus() {
 
           {/* Additional Info Card */}
           {steps.length > 0 && (
-            <Card className="border border-slate-200 bg-slate-50">
+            <Card className="border border-slate-300 rounded-sm shadow-none bg-slate-50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-slate-600">

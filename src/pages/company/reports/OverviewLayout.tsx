@@ -21,19 +21,21 @@ export default function OverviewLayout() {
   ];
 
   return (
-    <div className="h-full p-4">
-      <section className="h-full bg-white border border-slate-200 rounded-md">
+      
+      <div className=" h-full p-2">
+        <section className="h-full bg-white border border-slate-200 rounded-sm">
 
-        {/* The Tab Navigation */}
-        <div className="px-6 pt-6">
-          <PageTabs tabs={tabs} />
-        </div>
+          {/* Tabs */}
+          <div className="px-6 pt-6">
+            <PageTabs tabs={tabs} />
+          </div>
 
-        {/* This renders the actual page component (EmployeeSection, etc.) */}
-        <div className="px-6 py-4">
-          <Outlet />
-        </div>
-      </section>
-    </div>
+          {/* Content */}
+          <div className="px-6 py-4">
+            <Outlet />
+          </div>
+
+        </section>
+      </div>
   );
 }

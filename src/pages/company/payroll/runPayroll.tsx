@@ -171,7 +171,7 @@ export default function RunPayroll() {
 
 return (
     <div className="space-y-6">
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <Card className="rounded-sm border-slate-300 shadow-none overflow-hidden">
         <CardContent className="p-0">
           <div className="grid grid-cols-1 md:grid-cols-3">
             {/* Left: Main Action */}
@@ -186,7 +186,7 @@ return (
               <div className="mt-8">
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="w-full bg-[#1F3A8A] hover:bg-[#162a63] shadow-md group cursor-pointer">
+                    <Button size="lg" className="w-full bg-[#1F3A8A] hover:bg-[#162a63] rounded-sm shadow-none group cursor-pointer">
                       <TrendingUp className="mr-2 h-5 w-5" />
                       Prepare New Cycle
                       <ChevronRight className="ml-auto h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -334,7 +334,7 @@ return (
           {existingRuns.slice(0, 3).map((run) => (
             <Card 
               key={run.id} 
-              className="hover:border-[#1F3A8A]/30 cursor-pointer transition-all hover:shadow-md group"
+              className="hover:border-[#1F3A8A]/30 cursor-pointer transition-all hover:shadow-md rounded-sm group"
               onClick={() => navigate(`/company/${companyId}/payroll/${run.id}/review-status`)}
             >
               <CardContent className="p-5">

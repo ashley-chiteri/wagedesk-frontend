@@ -1,6 +1,9 @@
 // pages/preparation/index.tsx
 import { useState } from 'react';
 import PreparationTabs from '@/components/payroll/runs/PreparationTabs';
+import PayrollPreparationOverview from './PayrollPreparationOverview';
+import PayrollPreparationEarnings from './PayrollPreparationEarnings';
+import PayrollPreparationDeductions from './PayrollPreparationDeductions';
 
 export default function PreparationLayout() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -8,11 +11,11 @@ export default function PreparationLayout() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <div>Overview content</div>;
+        return <PayrollPreparationOverview />;
       case 'earnings':
-        return <div>Earnings Breakdown content</div>;
+        return <PayrollPreparationEarnings />;
       case 'deductions':
-        return <div>Deductions Breakdown content</div>;
+        return <PayrollPreparationDeductions />;
       default:
         return null;
     }

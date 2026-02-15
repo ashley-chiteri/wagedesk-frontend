@@ -37,7 +37,7 @@ const ModuleDashboard = () => {
     },
     {
       name: "Reports",
-      link: `/company/${currentCompany?.id}/reports/overview/statutory`,
+      link: `/company/${currentCompany?.id}/reports/overview`,
       description: "Analyze business performance and analytics.",
       icon: <BarChart3 className="w-6 h-6" />,
       color: "bg-purple-50 text-purple-600",

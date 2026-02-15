@@ -5,8 +5,6 @@ import {
   Home, 
   ArrowLeft, 
   Search, 
-  Compass,
-  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,40 +66,6 @@ export default function NotFound() {
                 </Button>
               </div>
 
-              {/* Quick Links */}
-              <div className="pt-4">
-                <p className="text-xs text-slate-400 mb-3">Quick Access</p>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/company-setup")}
-                    className="text-slate-600 hover:text-slate-900"
-                  >
-                    <Building2 className="mr-1 h-3 w-3" />
-                    Company Setup
-                  </Button>
-                  <span className="text-slate-300">•</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/dashboard/account-settings")}
-                    className="text-slate-600 hover:text-slate-900"
-                  >
-                    Account Settings
-                  </Button>
-                  <span className="text-slate-300">•</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.location.href = "#/"}
-                    className="text-slate-600 hover:text-slate-900"
-                  >
-                    <Compass className="mr-1 h-3 w-3" />
-                    Go to Home
-                  </Button>
-                </div>
-              </div>
             </div>
 
             {/* Search Help */}
@@ -115,7 +79,7 @@ export default function NotFound() {
                     Can't find what you're looking for?
                   </p>
                   <p className="text-xs text-slate-500">
-                    Try checking the URL or contact support for assistance
+                    Please contact support for assistance
                   </p>
                 </div>
               </div>

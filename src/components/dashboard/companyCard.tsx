@@ -77,7 +77,7 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
                 </Link>
                 {role !== "Viewer" && (
                   <Link
-                    to={`/company/${company.id}/reports/overview/statutory`}
+                    to={`/company/${company.id}/reports/overview`}
                   >
                     <DropdownMenuItem className="cursor-pointer">
                       View Reports

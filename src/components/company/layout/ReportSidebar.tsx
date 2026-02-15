@@ -13,7 +13,7 @@ export default function ReportSidebar() {
   const navItems = [
     {
       label: "Overview",
-      href: `/company/${companyId}/reports/overview/statutory`,
+      href: `/company/${companyId}/reports/overview`,
       icon: LayoutDashboard,
       exact: true,
     },
