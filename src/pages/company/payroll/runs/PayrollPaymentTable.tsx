@@ -1,29 +1,40 @@
+// PayrollPreparationOverview.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
-
+import { Badge } from "@/components/ui/badge";
 import { PayrollReportTable } from "./PayrollReportTable";
 import { ColumnDef } from "@tanstack/react-table";
 import axios from "axios";
 import { API_BASE_URL } from "@/config";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
+interface BankDetail {
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+  bankCode: string;
+  branchName: string;
+  branchCode: string;
+}
 
 interface PayrollReportData {
   fullName: string;
+  paymentMethod: string;
   jobTitle: string;
-  employmentType: string;
-  grossPay: number;
-  paye: number;
-  nssf: number;
-  shif: number;
-  housingLevy: number;
-  otherDeductions: number; 
-  totalDeductions: number;
+  companyAccountNumber: string;
+  bankDetails: BankDetail;
   netPay: number;
+  reviewStatus: string;
 }
-export default function PayrollPreparationDeductions() {
+
+const toProperCase = (str: string) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+export default function PayrollPaymentTable() {
   const { companyId, payrollRunId } = useParams();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<PayrollReportData[]>([]);
   const [loading, setLoading] = useState(true);
   const { session } = useAuthStore();
 
@@ -39,7 +50,12 @@ export default function PayrollPreparationDeductions() {
             },
           },
         );
-        setData(response.data);
+
+        // FILTER LOGIC: 
+        const approvedPayments = response.data.filter(
+          (item: PayrollReportData) => item.reviewStatus === "APPROVED"
+        );
+        setData(approvedPayments);
       } catch (error) {
         console.error("Error fetching earnings data:", error);
       } finally {
@@ -48,15 +64,6 @@ export default function PayrollPreparationDeductions() {
     };
     fetchData();
   }, [companyId, payrollRunId, session]);
-
-  const getInitials = (fullName: string) => {
-    return fullName
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -72,11 +79,6 @@ export default function PayrollPreparationDeductions() {
       header: "Employee",
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 text-white bg-[#1F3A8A]">
-            <AvatarFallback className="text-xs font-bold bg-[#1F3A8A]">
-              {getInitials(row.original.fullName)}
-            </AvatarFallback>
-          </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-slate-900">
               {row.original.fullName}
@@ -89,90 +91,76 @@ export default function PayrollPreparationDeductions() {
       ),
     },
     {
-      accessorKey: "employmentType",
-      header: "Employment Type",
-      cell: ({ row }) => {
-        const type = row.original.employmentType?.toLowerCase() || "";
-        
-        // Logic to format the display text
-        let displayText = "";
-        if (type.includes("primary")) {
-          displayText = "Primary";
-        } else if (type.includes("secondary")) {
-          displayText = "Secondary";
-        } else if (type.includes("consultant")) {
-          displayText = "Consultant";
-        } else {
-          displayText = row.original.employmentType; // Fallback to original if no match
-        }
-
-        return (
-          <span className="text-slate-600 font-medium">
-            {displayText}
-          </span>
-        );
-      },
+      accessorKey: "paymentMethod",
+      header: "Pay via",
+      cell: ({ row }) => (
+        <span className="text-slate-500 text-xs ">
+          <Badge variant="outline" className="text-xs border-slate-300 ">
+            {toProperCase(row.original.paymentMethod)}
+          </Badge>
+        </span>
+      ),
     },
     {
-      accessorKey: "grossPay",
-      header: "Gross Pay",
-      cell: ({ row }) => (
-        <span className="text-emerald-600 font-medium">
-          + {formatCurrency(row.original.grossPay)}
-        </span>
-      ),
-    },
-     {
-      accessorKey: "paye",
-      header: "PAYE",
+      accessorKey: "companyAccountNumber",
+      header: "Company Acc No.",
       cell: ({ row }) => (
         <span className="text-slate-700 font-medium">
-          {formatCurrency(row.original.paye)}
+          {row.original.companyAccountNumber}
         </span>
       ),
     },
-     {
-      accessorKey: "nssf",
-      header: "NSSF",
+    {
+      accessorKey: "bankDetails.accountNumber",
+      header: "Employee Acc No.",
       cell: ({ row }) => (
         <span className="text-slate-700 font-medium">
-          {formatCurrency(row.original.nssf)}
+          {row.original.bankDetails.accountNumber || "-"}
         </span>
       ),
     },
-     {
-      accessorKey: "shif",
-      header: "SHIF",
+    {
+      accessorKey: "bankDetails.accountName",
+      header: "Employee Acc Name",
       cell: ({ row }) => (
         <span className="text-slate-700 font-medium">
-          {formatCurrency(row.original.shif)}
+          {row.original.bankDetails.accountName || "-"}
         </span>
       ),
     },
-     {
-      accessorKey: "housingLevy",
-      header: "Housing Levy",
+    {
+      accessorKey: "bankDetails.bankName",
+      header: "Bank Name",
       cell: ({ row }) => (
         <span className="text-slate-700 font-medium">
-          {formatCurrency(row.original.housingLevy)}
+          {row.original.bankDetails.bankName || "-"}
         </span>
       ),
     },
-     {
-      accessorKey: "otherDeductions",
-      header: "Other Deductions",
+    {
+      accessorKey: "bankDetails.bankCode",
+      header: "Bank Code",
       cell: ({ row }) => (
         <span className="text-slate-700 font-medium">
-          {formatCurrency(row.original.otherDeductions)}
+          {row.original.bankDetails.bankCode || "-"}
         </span>
       ),
     },
-     {
-      accessorKey: "totalDeductions",
-      header: "Total Deductions",
+    {
+      accessorKey: "bankDetails.branchName",
+      header: "Branch Name",
       cell: ({ row }) => (
-        <span className="text-rose-600 font-medium">
-          - {formatCurrency(row.original.totalDeductions)}
+        <span className="text-slate-700 font-medium">
+          {row.original.bankDetails.branchName || "-"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "bankDetails.branchCode",
+      header: "Branch Code",
+      cell: ({ row }) => (
+        <span className="text-slate-700 font-medium">
+          {row.original.bankDetails.branchCode || "-"}
         </span>
       ),
     },
@@ -180,7 +168,7 @@ export default function PayrollPreparationDeductions() {
       accessorKey: "netPay",
       header: "Net Pay",
       cell: ({ row }) => (
-        <span className="text-slate-700 font-bold">
+        <span className="text-slate-700 font-medium">
           {formatCurrency(row.original.netPay)}
         </span>
       ),
