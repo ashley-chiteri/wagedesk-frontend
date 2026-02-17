@@ -6,20 +6,21 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Info } from "lucide-react";
+import { Info, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { API_BASE_URL } from "@/config";
 import { useAuthStore } from "@/stores/authStore";
 import { AssignedDeduction } from "./DeductionAssignTable";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { BorderFloatingField } from "@/components/company/employees/employeeutils";
 
 type Props = {
   deduction: AssignedDeduction;
@@ -60,9 +61,16 @@ export default function EditDeductionDialog({
     }
   }, [isRecurring, startDate, numberOfMonths]);
 
+  // Reset end date when switching to recurring
+  useEffect(() => {
+    if (isRecurring) {
+      setEndDate("");
+    }
+  }, [isRecurring]);
+
   const validateForm = () => {
-    if (!value) {
-      toast.error("Please enter a value");
+    if (!value || Number(value) <= 0) {
+      toast.error("Please enter a valid value");
       return false;
     }
     if (!startDate) {
@@ -120,10 +128,10 @@ export default function EditDeductionDialog({
     switch (deduction.applies_to) {
       case "INDIVIDUAL":
         return deduction.employees
-          ? `${deduction.employees.first_name} ${deduction.employees.last_name}`
+          ? `${deduction.employees.first_name} ${deduction.employees.last_name} (${deduction.employees.employee_number})`
           : "Unknown Employee";
       case "COMPANY":
-        return "All Employees";
+        return "All Employees (Company-wide)";
       case "DEPARTMENT":
         return deduction.departments?.name || "Unknown Department";
       case "SUB_DEPARTMENT":
@@ -137,89 +145,119 @@ export default function EditDeductionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Deduction</DialogTitle>
+      <DialogContent className="sm:max-w-2xl rounded-lg border-slate-200 p-0 gap-0 shadow-lg">
+        <DialogHeader className="p-6 pb-4 border-b border-slate-100">
+          <DialogTitle className="text-lg font-semibold text-slate-900">
+            Edit Deduction
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
+            Update the deduction details below
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Read-only fields */}
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+          {/* Read-only fields - styled as info cards */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Deduction Type</Label>
-              <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/50">
-                <span>{deduction.deduction_types.name}</span>
-                {deduction.deduction_types.is_pre_tax && (
-                  <Badge variant="secondary" className="text-xs">
-                    Pre-tax
-                  </Badge>
-                )}
+              <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Deduction Type
+              </Label>
+              <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
+                <Badge 
+                  variant="secondary" 
+                  className={cn(
+                    "text-xs font-medium",
+                    deduction.deduction_types.is_pre_tax 
+                      ? "bg-amber-50 text-amber-700 border border-amber-200"
+                      : "bg-slate-50 text-slate-600 border border-slate-200"
+                  )}
+                >
+                  {deduction.deduction_types.is_pre_tax ? "Pre-tax" : "Post-tax"}
+                </Badge>
+                <span className="text-sm font-medium text-slate-900">
+                  {deduction.deduction_types.name}
+                </span>
               </div>
             </div>
+            
             <div className="space-y-2">
-              <Label>Assigned To</Label>
-              <div className="p-2 border rounded-md bg-muted/50">
-                {getRecipientDisplay()}
-                {deduction.applies_to !== "INDIVIDUAL" && 
-                 deduction.applies_to !== "COMPANY" && (
-                  <Badge variant="outline" className="ml-2 text-xs">
-                    {deduction.applies_to.replace("_", " ")}
-                  </Badge>
-                )}
+              <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Assigned To
+              </Label>
+              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="flex items-center flex-wrap gap-1">
+                  <span className="text-sm text-slate-700">{getRecipientDisplay()}</span>
+                  {deduction.applies_to !== "INDIVIDUAL" && 
+                   deduction.applies_to !== "COMPANY" && (
+                    <Badge variant="outline" className="text-xs border-slate-300">
+                      {deduction.applies_to.replace("_", " ")}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Pre-tax info */}
           {deduction.deduction_types.is_pre_tax && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md">
-              <Info className="h-4 w-4 text-blue-500" />
-              <span>
+            <div className="bg-amber-50/80 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+              <Info className="h-4 w-4 text-amber-700 mt-0.5" />
+              <p className="text-xs text-amber-700">
                 This is a pre-tax deduction. It will be deducted before tax calculation.
-              </span>
+              </p>
             </div>
           )}
 
           {/* Value and Calculation Type */}
           <div className="grid grid-cols-2 gap-4">
+            <BorderFloatingField
+              label={calculationType === "PERCENTAGE" ? "Percentage %" : "Amount (KES)"}
+              type="number"
+              //step={calculationType === "PERCENTAGE" ? "0.01" : "1"}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              required
+            />
             <div className="space-y-2">
-              <Label htmlFor="value">Value *</Label>
-              <Input
-                id="value"
-                type="number"
-                min="0"
-                step={calculationType === "PERCENTAGE" ? "0.01" : "1"}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={calculationType === "PERCENTAGE" ? "Enter percentage" : "Enter amount"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Calculation Type *</Label>
-              <RadioGroup
-                value={calculationType}
-                onValueChange={(val: "FIXED" | "PERCENTAGE") =>
-                  setCalculationType(val)
-                }
-                className="flex h-10 items-center space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="FIXED" id="fixed" />
-                  <Label htmlFor="fixed">Fixed</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="PERCENTAGE" id="percentage" />
-                  <Label htmlFor="percentage">Percentage</Label>
-                </div>
-              </RadioGroup>
+              <Label className="text-sm font-medium text-slate-700">Calculation Type *</Label>
+              <div className="flex gap-2 p-1 bg-slate-50 rounded-lg border border-slate-200">
+                <Button
+                  type="button"
+                  variant={calculationType === "FIXED" ? "default" : "ghost"}
+                  onClick={() => setCalculationType("FIXED")}
+                  className={cn(
+                    "flex-1 h-9 text-sm font-medium rounded-md transition-all",
+                    calculationType === "FIXED"
+                      ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                      : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  Fixed
+                </Button>
+                <Button
+                  type="button"
+                  variant={calculationType === "PERCENTAGE" ? "default" : "ghost"}
+                  onClick={() => setCalculationType("PERCENTAGE")}
+                  className={cn(
+                    "flex-1 h-9 text-sm font-medium rounded-md transition-all",
+                    calculationType === "PERCENTAGE"
+                      ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                      : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  Percentage
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Recurring Switch */}
-          <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
-            <div>
-              <Label htmlFor="is-recurring">Recurring Deduction</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between border border-slate-200 rounded-lg p-4 bg-white">
+            <div className="space-y-0.5">
+              <Label htmlFor="is-recurring" className="text-sm font-medium text-slate-700">
+                Recurring Deduction
+              </Label>
+              <p className="text-xs text-slate-500">
                 {isRecurring
                   ? "This deduction will continue indefinitely"
                   : "This deduction will end after a specified period"}
@@ -229,41 +267,39 @@ export default function EditDeductionDialog({
               id="is-recurring"
               checked={isRecurring}
               onCheckedChange={setIsRecurring}
+              className="data-[state=checked]:bg-[#1F3A8A]"
             />
           </div>
 
           {/* Date Fields */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Start Date *</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
+            <BorderFloatingField
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+            />
 
             {!isRecurring && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="months">Number of Months</Label>
-                  <Input
-                    id="months"
-                    type="number"
-                    min="1"
-                    value={numberOfMonths}
-                    onChange={(e) => setNumberOfMonths(e.target.value)}
-                    placeholder="Enter number of months"
-                  />
-                </div>
+                <BorderFloatingField
+                  label="Number of Months"
+                  type="number"
+                  value={numberOfMonths}
+                  onChange={(e) => setNumberOfMonths(e.target.value)}
+                />
                 {endDate && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="border-blue-200 bg-blue-50/80">
+                    <Info className="h-4 w-4 text-blue-700" />
+                    <AlertDescription className="text-xs text-blue-700">
                       This deduction will end on{" "}
                       <span className="font-medium">
-                        {new Date(endDate).toLocaleDateString()}
+                        {new Date(endDate).toLocaleDateString("en-KE", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </span>
                     </AlertDescription>
                   </Alert>
@@ -273,16 +309,28 @@ export default function EditDeductionDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="p-6 pt-4 border-t border-slate-100 bg-slate-50/50">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 rounded-md h-10 px-6"
+          >
             Cancel
           </Button>
           <Button
-            className="bg-[#7F5EFD] text-white hover:bg-[#6a4ad3]"
             onClick={handleUpdate}
             disabled={loading}
+            className="bg-[#1F3A8A] hover:bg-[#162a63] px-6 rounded-md h-10 text-sm font-medium shadow-sm min-w-35"
           >
-            {loading ? "Updating..." : "Update Deduction"}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Updating...</span>
+              </div>
+            ) : (
+              "Update Deduction"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

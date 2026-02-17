@@ -2,9 +2,9 @@
   "name": "wagedesk",
   "private": true,
   "description": "An application for simplifying payroll processes",
-  "author": "Ashley Chiteri",
+  "author": "WageDesk Team",
   "license": "MIT",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

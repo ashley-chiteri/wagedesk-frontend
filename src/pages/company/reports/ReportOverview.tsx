@@ -142,7 +142,7 @@ const ReportOverview = () => {
         fileType = "xlsx";
     }
 
-    const reportUrl = `${API_BASE_URL}/companies/${companyId}/payroll/runs/${selectedRun.id}/reports/${report.type}?download=false&token=${token}`;
+    const reportUrl = `${API_BASE_URL}/company/${companyId}/payroll/runs/${selectedRun.id}/reports/${report.type}?download=false&token=${token}`;
 
     navigate(
       `/company/${companyId}/reports/report-preview?file=${encodeURIComponent(

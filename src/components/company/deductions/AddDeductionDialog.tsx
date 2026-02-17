@@ -6,9 +6,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -31,14 +31,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, ChevronsUpDown, Info } from "lucide-react";
+import { Check, ChevronsUpDown, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+//import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { API_BASE_URL } from "@/config";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BorderFloatingField } from "@/components/company/employees/employeeutils";
 
 type Props = {
   companyId: string;
@@ -101,8 +102,7 @@ export default function AddDeductionDialog({
 
   // Form states
   const [deductionTypeId, setDeductionTypeId] = useState<string>("");
-  const [selectedDeductionType, setSelectedDeductionType] =
-    useState<DeductionType | null>(null);
+  const [selectedDeductionType, setSelectedDeductionType] = useState<DeductionType | null>(null);
   const [appliesTo, setAppliesTo] = useState<string>("INDIVIDUAL");
   const [employeeId, setEmployeeId] = useState<string>("");
   const [departmentId, setDepartmentId] = useState<string>("");
@@ -174,8 +174,8 @@ export default function AddDeductionDialog({
       toast.error("Please select a deduction type");
       return false;
     }
-    if (!value) {
-      toast.error("Please enter a value");
+    if (!value || Number(value) <= 0) {
+      toast.error("Please enter a valid value");
       return false;
     }
 
@@ -277,29 +277,34 @@ export default function AddDeductionDialog({
       case "INDIVIDUAL":
         return (
           <div className="space-y-2">
-            <Label>Employee *</Label>
+            <Label className="text-sm font-medium text-slate-700">Employee *</Label>
             <Popover open={openEmployee} onOpenChange={setOpenEmployee}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openEmployee}
-                  className="w-full justify-between"
+                  className="w-full justify-between border-slate-200 hover:bg-slate-50 h-10"
                 >
-                  {employeeId
-                    ? employees.find((emp) => emp.id === employeeId)
-                        ?.first_name +
-                      " " +
-                      employees.find((emp) => emp.id === employeeId)?.last_name
-                    : "Select employee..."}
+                  {employeeId ? (
+                    <span className="truncate">
+                      {employees.find((emp) => emp.id === employeeId)?.first_name}{" "}
+                      {employees.find((emp) => emp.id === employeeId)?.last_name}
+                      <span className="text-slate-400 ml-1">
+                        ({employees.find((emp) => emp.id === employeeId)?.employee_number})
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-slate-500">Select employee...</span>
+                  )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-100 p-0">
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                 <Command>
-                  <CommandInput placeholder="Search employees..." />
+                  <CommandInput placeholder="Search employees..." className="h-9" />
                   <CommandEmpty>No employee found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-64 overflow-auto">
                     {employees.map((emp) => (
                       <CommandItem
                         key={emp.id}
@@ -307,6 +312,7 @@ export default function AddDeductionDialog({
                           setEmployeeId(emp.id);
                           setOpenEmployee(false);
                         }}
+                        className="cursor-pointer"
                       >
                         <Check
                           className={cn(
@@ -314,11 +320,9 @@ export default function AddDeductionDialog({
                             employeeId === emp.id ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        <div>
-                          <div>{`${emp.first_name} ${emp.last_name}`}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {emp.employee_number}
-                          </div>
+                        <div className="flex flex-col">
+                          <span>{`${emp.first_name} ${emp.last_name}`}</span>
+                          <span className="text-xs text-slate-400">{emp.employee_number}</span>
                         </div>
                       </CommandItem>
                     ))}
@@ -332,26 +336,28 @@ export default function AddDeductionDialog({
       case "DEPARTMENT":
         return (
           <div className="space-y-2">
-            <Label>Department *</Label>
+            <Label className="text-sm font-medium text-slate-700">Department *</Label>
             <Popover open={openDepartment} onOpenChange={setOpenDepartment}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openDepartment}
-                  className="w-full justify-between"
+                  className="w-full justify-between border-slate-200 hover:bg-slate-50 h-10"
                 >
-                  {departmentId
-                    ? departments.find((dept) => dept.id === departmentId)?.name
-                    : "Select department..."}
+                  {departmentId ? (
+                    departments.find((dept) => dept.id === departmentId)?.name
+                  ) : (
+                    <span className="text-slate-500">Select department...</span>
+                  )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-100 p-0">
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                 <Command>
-                  <CommandInput placeholder="Search departments..." />
+                  <CommandInput placeholder="Search departments..." className="h-9" />
                   <CommandEmpty>No department found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-64 overflow-auto">
                     {departments.map((dept) => (
                       <CommandItem
                         key={dept.id}
@@ -360,6 +366,7 @@ export default function AddDeductionDialog({
                           setSubDepartmentId(""); // Reset sub-department when department changes
                           setOpenDepartment(false);
                         }}
+                        className="cursor-pointer"
                       >
                         <Check
                           className={cn(
@@ -381,7 +388,7 @@ export default function AddDeductionDialog({
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Department</Label>
+              <Label className="text-sm font-medium text-slate-700">Department</Label>
               <Select
                 value={departmentId}
                 onValueChange={(value) => {
@@ -389,7 +396,7 @@ export default function AddDeductionDialog({
                   setSubDepartmentId("");
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-slate-200 h-10">
                   <SelectValue placeholder="Select department first" />
                 </SelectTrigger>
                 <SelectContent>
@@ -404,28 +411,30 @@ export default function AddDeductionDialog({
 
             {departmentId && (
               <div className="space-y-2">
-                <Label>Sub-department *</Label>
+                <Label className="text-sm font-medium text-slate-700">Sub-department *</Label>
                 <Popover open={openSubDepartment} onOpenChange={setOpenSubDepartment}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       role="combobox"
                       aria-expanded={openSubDepartment}
-                      className="w-full justify-between"
+                      className="w-full justify-between border-slate-200 hover:bg-slate-50 h-10"
                     >
-                      {subDepartmentId
-                        ? filteredSubDepartments.find(
-                            (sub) => sub.id === subDepartmentId
-                          )?.name
-                        : "Select sub-department..."}
+                      {subDepartmentId ? (
+                        filteredSubDepartments.find(
+                          (sub) => sub.id === subDepartmentId
+                        )?.name
+                      ) : (
+                        <span className="text-slate-500">Select sub-department...</span>
+                      )}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-100 p-0">
+                  <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                     <Command>
-                      <CommandInput placeholder="Search sub-departments..." />
+                      <CommandInput placeholder="Search sub-departments..." className="h-9" />
                       <CommandEmpty>No sub-department found.</CommandEmpty>
-                      <CommandGroup>
+                      <CommandGroup className="max-h-64 overflow-auto">
                         {filteredSubDepartments.map((sub) => (
                           <CommandItem
                             key={sub.id}
@@ -433,6 +442,7 @@ export default function AddDeductionDialog({
                               setSubDepartmentId(sub.id);
                               setOpenSubDepartment(false);
                             }}
+                            className="cursor-pointer"
                           >
                             <Check
                               className={cn(
@@ -440,7 +450,12 @@ export default function AddDeductionDialog({
                                 subDepartmentId === sub.id ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {sub.name}
+                            <div className="flex flex-col">
+                              <span>{sub.name}</span>
+                              <span className="text-xs text-slate-400">
+                                {departments.find(d => d.id === sub.department_id)?.name}
+                              </span>
+                            </div>
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -455,26 +470,28 @@ export default function AddDeductionDialog({
       case "JOB_TITLE":
         return (
           <div className="space-y-2">
-            <Label>Job Title *</Label>
+            <Label className="text-sm font-medium text-slate-700">Job Title *</Label>
             <Popover open={openJobTitle} onOpenChange={setOpenJobTitle}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openJobTitle}
-                  className="w-full justify-between"
+                  className="w-full justify-between border-slate-200 hover:bg-slate-50 h-10"
                 >
-                  {jobTitleId
-                    ? jobTitles.find((job) => job.id === jobTitleId)?.title
-                    : "Select job title..."}
+                  {jobTitleId ? (
+                    jobTitles.find((job) => job.id === jobTitleId)?.title
+                  ) : (
+                    <span className="text-slate-500">Select job title...</span>
+                  )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-100 p-0">
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                 <Command>
-                  <CommandInput placeholder="Search job titles..." />
+                  <CommandInput placeholder="Search job titles..." className="h-9" />
                   <CommandEmpty>No job title found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-64 overflow-auto">
                     {jobTitles.map((job) => (
                       <CommandItem
                         key={job.id}
@@ -482,6 +499,7 @@ export default function AddDeductionDialog({
                           setJobTitleId(job.id);
                           setOpenJobTitle(false);
                         }}
+                        className="cursor-pointer"
                       >
                         <Check
                           className={cn(
@@ -506,58 +524,88 @@ export default function AddDeductionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Assign New Deduction</DialogTitle>
+      <DialogContent className="sm:max-w-2xl rounded-lg border-slate-200 p-0 gap-0 shadow-lg">
+        <DialogHeader className="p-6 pb-4 border-b border-slate-100">
+          <DialogTitle className="text-lg font-semibold text-slate-900">
+            Assign New Deduction
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
+            Configure and assign a deduction to employees
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {/* Deduction Type */}
           <div className="space-y-2">
-            <Label htmlFor="deduction-type">Deduction Type *</Label>
+            <Label className="text-sm font-medium text-slate-700">Deduction Type *</Label>
             <Popover open={openDeductionType} onOpenChange={setOpenDeductionType}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openDeductionType}
-                  className="w-full justify-between"
+                  className="w-full justify-between border-slate-200 hover:bg-slate-50 h-10"
                 >
-                  {selectedDeductionType?.name || "Select deduction type..."}
+                  {selectedDeductionType ? (
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant="secondary" 
+                        className={cn(
+                          "text-xs font-medium",
+                          selectedDeductionType.is_pre_tax 
+                            ? "bg-amber-50 text-amber-700 border border-amber-200"
+                            : "bg-slate-50 text-slate-600 border border-slate-200"
+                        )}
+                      >
+                        {selectedDeductionType.is_pre_tax ? "Pre-tax" : "Post-tax"}
+                      </Badge>
+                      <span>{selectedDeductionType.name}</span>
+                    </div>
+                  ) : (
+                    <span className="text-slate-500">Select deduction type...</span>
+                  )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-100 p-0">
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                 <Command>
-                  <CommandInput placeholder="Search deduction types..." />
+                  <CommandInput placeholder="Search deduction types..." className="h-9" />
                   <CommandEmpty>No deduction type found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-64 overflow-auto">
                     {deductionTypes.map((type) => (
                       <CommandItem
                         key={type.id}
                         onSelect={() => handleDeductionTypeSelect(type)}
+                        className="cursor-pointer"
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            deductionTypeId === type.id
-                              ? "opacity-100"
-                              : "opacity-0"
+                            deductionTypeId === type.id ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        <div className="flex-1">
+                        <div className="flex flex-col gap-1 flex-1">
                           <div className="flex items-center justify-between">
-                            <span>{type.name}</span>
-                            {type.is_pre_tax && (
-                              <Badge variant="secondary" className="ml-2 text-xs">
-                                Pre-tax
-                              </Badge>
-                            )}
+                            <span className="font-medium">{type.name}</span>
+                            <Badge 
+                              variant="secondary" 
+                              className={cn(
+                                "text-xs",
+                                type.is_pre_tax 
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-slate-50 text-slate-600 border border-slate-200"
+                              )}
+                            >
+                              {type.is_pre_tax ? "Pre-tax" : "Post-tax"}
+                            </Badge>
                           </div>
                           {type.description && (
-                            <div className="text-xs text-muted-foreground">
-                              {type.description}
-                            </div>
+                            <span className="text-xs text-slate-500">{type.description}</span>
+                          )}
+                          {type.has_maximum_value && type.maximum_value && (
+                            <span className="text-xs text-slate-400">
+                              Max: {type.maximum_value}
+                            </span>
                           )}
                         </div>
                       </CommandItem>
@@ -569,9 +617,20 @@ export default function AddDeductionDialog({
 
             {/* Deduction type info */}
             {selectedDeductionType && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <Info className="h-4 w-4" />
-                <span>
+              <div className={cn(
+                "flex items-start gap-2 text-sm p-3 rounded-lg border",
+                selectedDeductionType.is_pre_tax
+                  ? "bg-amber-50/80 border-amber-200"
+                  : "bg-slate-50 border-slate-200"
+              )}>
+                <Info className={cn(
+                  "h-4 w-4 mt-0.5",
+                  selectedDeductionType.is_pre_tax ? "text-amber-700" : "text-slate-500"
+                )} />
+                <span className={cn(
+                  "text-xs",
+                  selectedDeductionType.is_pre_tax ? "text-amber-700" : "text-slate-600"
+                )}>
                   {selectedDeductionType.is_pre_tax 
                     ? "This is a pre-tax deduction (deducted before tax calculation)"
                     : "This is a post-tax deduction (deducted after tax calculation)"}
@@ -582,14 +641,14 @@ export default function AddDeductionDialog({
 
           {/* Applies To */}
           <div className="space-y-2">
-            <Label>Applies To *</Label>
+            <Label className="text-sm font-medium text-slate-700">Applies To *</Label>
             <Select value={appliesTo} onValueChange={setAppliesTo}>
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-200 h-10">
                 <SelectValue placeholder="Select who this applies to" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="INDIVIDUAL">Individual Employee</SelectItem>
-                <SelectItem value="COMPANY">All Employees (Company)</SelectItem>
+                <SelectItem value="COMPANY">All Employees (Company-wide)</SelectItem>
                 <SelectItem value="DEPARTMENT">Department</SelectItem>
                 <SelectItem value="SUB_DEPARTMENT">Sub-department</SelectItem>
                 <SelectItem value="JOB_TITLE">Job Title</SelectItem>
@@ -602,50 +661,65 @@ export default function AddDeductionDialog({
 
           {/* Value and Calculation Type */}
           <div className="grid grid-cols-2 gap-4">
+            <BorderFloatingField
+              label={calculationType === "PERCENTAGE" ? "Percentage %" : "Amount (KES)"}
+              type="number"
+             // step={calculationType === "PERCENTAGE" ? "0.01" : "1"}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              required
+            />
             <div className="space-y-2">
-              <Label htmlFor="value">Value *</Label>
-              <Input
-                id="value"
-                type="number"
-                min="0"
-                step={calculationType === "PERCENTAGE" ? "0.01" : "1"}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={calculationType === "PERCENTAGE" ? "Enter percentage" : "Enter amount"}
-              />
-              {selectedDeductionType?.has_maximum_value && selectedDeductionType.maximum_value && (
-                <p className="text-xs text-muted-foreground">
-                  Maximum value: {selectedDeductionType.maximum_value}
-                  {calculationType === "PERCENTAGE" ? "%" : ""}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Calculation Type *</Label>
-              <RadioGroup
-                value={calculationType}
-                onValueChange={(val: "FIXED" | "PERCENTAGE") =>
-                  setCalculationType(val)
-                }
-                className="flex h-10 items-center space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="FIXED" id="fixed" />
-                  <Label htmlFor="fixed">Fixed</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="PERCENTAGE" id="percentage" />
-                  <Label htmlFor="percentage">Percentage</Label>
-                </div>
-              </RadioGroup>
+              <Label className="text-sm font-medium text-slate-700">Calculation Type *</Label>
+              <div className="flex gap-2 p-1 bg-slate-50 rounded-lg border border-slate-200">
+                <Button
+                  type="button"
+                  variant={calculationType === "FIXED" ? "default" : "ghost"}
+                  onClick={() => setCalculationType("FIXED")}
+                  className={cn(
+                    "flex-1 h-9 text-sm font-medium rounded-md transition-all",
+                    calculationType === "FIXED"
+                      ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                      : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  Fixed
+                </Button>
+                <Button
+                  type="button"
+                  variant={calculationType === "PERCENTAGE" ? "default" : "ghost"}
+                  onClick={() => setCalculationType("PERCENTAGE")}
+                  className={cn(
+                    "flex-1 h-9 text-sm font-medium rounded-md transition-all",
+                    calculationType === "PERCENTAGE"
+                      ? "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-white"
+                      : "bg-transparent text-slate-500 hover:bg-white hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  Percentage
+                </Button>
+              </div>
             </div>
           </div>
 
+          {/* Maximum value info */}
+          {selectedDeductionType?.has_maximum_value && selectedDeductionType.maximum_value && (
+            <div className="bg-blue-50/80 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-700 flex items-center gap-2">
+                <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                Maximum allowed value: {selectedDeductionType.maximum_value}
+                {calculationType === "PERCENTAGE" ? "%" : ""}
+              </p>
+            </div>
+          )}
+
           {/* Recurring Switch */}
-          <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
-            <div>
-              <Label htmlFor="is-recurring">Recurring Deduction</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between border border-slate-200 rounded-lg p-4 bg-white">
+            <div className="space-y-0.5">
+              <Label htmlFor="is-recurring" className="text-sm font-medium text-slate-700">
+                Recurring Deduction
+              </Label>
+              <p className="text-xs text-slate-500">
                 {isRecurring
                   ? "This deduction will continue indefinitely"
                   : "This deduction will end after a specified period"}
@@ -655,41 +729,39 @@ export default function AddDeductionDialog({
               id="is-recurring"
               checked={isRecurring}
               onCheckedChange={setIsRecurring}
+              className="data-[state=checked]:bg-[#1F3A8A]"
             />
           </div>
 
           {/* Date Fields */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Start Date *</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
+            <BorderFloatingField
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+            />
 
             {!isRecurring && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="months">Number of Months</Label>
-                  <Input
-                    id="months"
-                    type="number"
-                    min="1"
-                    value={numberOfMonths}
-                    onChange={(e) => setNumberOfMonths(e.target.value)}
-                    placeholder="Enter number of months"
-                  />
-                </div>
+                <BorderFloatingField
+                  label="Number of Months"
+                  type="number"
+                  value={numberOfMonths}
+                  onChange={(e) => setNumberOfMonths(e.target.value)}
+                />
                 {endDate && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="border-blue-200 bg-blue-50/80">
+                    <Info className="h-4 w-4 text-blue-700" />
+                    <AlertDescription className="text-xs text-blue-700">
                       This deduction will end on{" "}
                       <span className="font-medium">
-                        {new Date(endDate).toLocaleDateString()}
+                        {new Date(endDate).toLocaleDateString("en-KE", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </span>
                     </AlertDescription>
                   </Alert>
@@ -699,16 +771,28 @@ export default function AddDeductionDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="p-6 pt-4 border-t border-slate-100 bg-slate-50/50">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 rounded-md h-10 px-6"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={loading}
-            className="bg-[#7F5EFD] text-white hover:bg-[#6a4ad3]"
+            className="bg-[#1F3A8A] hover:bg-[#162a63] px-6 rounded-md h-10 text-sm font-medium shadow-sm min-w-35"
           >
-            {loading ? "Assigning..." : "Assign Deduction"}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Assigning...</span>
+              </div>
+            ) : (
+              "Assign Deduction"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
