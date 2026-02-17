@@ -34,7 +34,7 @@ import axios from "axios";
 const AnnualReports = () => {
   const { session } = useAuthStore();
   const navigate = useNavigate();
-  const { companyId } = useParams<{ companyId: string }>();
+  const { companyId } = useParams();
   const [loading, setLoading] = useState(true);
   //const [downloading, setDownloading] = useState(false);
   const [downloadingYear, setDownloadingYear] = useState<number | null>(null);
@@ -81,7 +81,7 @@ const AnnualReports = () => {
   const handleDownloadReport = async (year: number) => {
     setDownloadingYear(year);
     try {
-      const url = `${API_BASE_URL}/companies/${companyId}/payroll/runs/annual-gross-earnings?year=${year}`;
+      const url = `${API_BASE_URL}/company/${companyId}/payroll/runs/annual-gross-earnings?year=${year}`;
 
       const response = await axios.get(url, {
         headers: {

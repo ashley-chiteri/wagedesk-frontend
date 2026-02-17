@@ -22,6 +22,8 @@ import PayrollLayout from "./pages/company/payroll/PayrollLayout.tsx";
 import RunPayroll from "./pages/company/payroll/runPayroll.tsx";
 import PayrollHistory from "./pages/company/payroll/PayrollHistory.tsx";
 import BenefitSettings from "./pages/company/payroll/settings/benefitSettings.tsx";
+import AssignBenefits from "./pages/company/payroll/settings/assignBenefits.tsx";
+import AssignDeductions from "./pages/company/payroll/settings/assignDeductions.tsx";
 import PayrollSettingsLayout from "./pages/company/payroll/settings/PayrollSettingsLayout.tsx";
 import PayrollWizard from "./components/payroll/runs/PayrollWizard.tsx";
 import PayrollReviewStatus from "./components/payroll/runs/PayrollReviewStatus.tsx";
@@ -128,6 +130,8 @@ const AppRouterWrapper = () => {
                 <Route path="wizard" element={<PayrollWizard />} />
                 <Route path="review-status" element={<PayrollReviewStatus />} />
               </Route>
+            <Route path="benefits/assign" element={<AssignBenefits />} />
+            <Route path="deductions/assign" element={<AssignDeductions />} />
             <Route path="payroll/setup" element={<PayrollSetup />} />
             {/**Report specific dashboards */}
             <Route path="reports" element={<ReportLayout />}>

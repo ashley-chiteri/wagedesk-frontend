@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { API_BASE_URL } from "@/config";
+import { useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -17,100 +21,232 @@ import {
   Legend,
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, Users, Wallet, FileText, Calendar } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const COLORS = [
-  "#0f172a",
-  "#334155",
-  "#64748b",
-  "#94a3b8",
-  "#cbd5e1",
-];
+/* --- Types & Interfaces --- */
 
-const payrollSummary = {
-  employeesPaid: 42,
-  grossPay: 5_420_000,
-  netPay: 4_120_000,
-  statutory: 820_000,
-  status: "APPROVED",
+interface PayrollSummary {
+  payrollId: string;
+  payrollMonth: string;
+  payrollYear: number;
+  status: string;
+  employeesPaid: number;
+  grossPay: number;
+  netPay: number;
+  statutory: number;
+}
+
+interface ChartDataItem {
+  name: string;
+  value: number;
+}
+
+interface DepartmentalData {
+  department: string;
+  netPay: number;
+}
+
+interface PayrollOverviewData {
+  summary: PayrollSummary;
+  breakdown: ChartDataItem[];
+  statutoryDetails: ChartDataItem[];
+  departmentalNetPay: DepartmentalData[];
+}
+
+// Modern, vibrant but professional color palette
+const CHART_COLORS = {
+  primary: ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"],
+  secondary: ["#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ddd6fe"],
+  accent: ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"],
+  neutral: ["#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"],
 };
 
-const payrollBreakdown = [
-  { name: "Basic Salary", value: 3_600_000 },
-  { name: "Cash Allowances", value: 980_000 },
-  { name: "Non-Cash Benefits", value: 320_000 },
-  { name: "Deductions", value: 520_000 },
-];
+const currency = (value: number | undefined) => {
+  if (value === undefined || value === null) return "KES 0";
+  return new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency: "KES",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
-const statutoryBreakdown = [
-  { name: "PAYE", value: 420_000 },
-  { name: "NSSF", value: 160_000 },
-  { name: "SHIF", value: 90_000 },
-  { name: "Housing Levy", value: 110_000 },
-  { name: "HELB", value: 40_000 },
-];
+const formatNumber = (value: number | undefined) => {
+  if (value === undefined || value === null) return "0";
+  return new Intl.NumberFormat("en-KE").format(value);
+};
 
-const netPayByDepartment = [
-  { department: "Engineering", netPay: 1_820_000 },
-  { department: "Finance", netPay: 820_000 },
-  { department: "HR", netPay: 460_000 },
-  { department: "Sales", netPay: 1_020_000 },
-];
-
-const currency = (value: number) =>
-  `KES ${value.toLocaleString()}`;
+const getStatusColor = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case "completed":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "processing":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    case "draft":
+      return "bg-slate-50 text-slate-700 border-slate-200";
+    default:
+      return "bg-blue-50 text-blue-700 border-blue-200";
+  }
+};
 
 const PayrollOverview = () => {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-medium text-slate-900">
-        Payroll Overview
-      </h2>
+  const [data, setData] = useState<PayrollOverviewData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { session } = useAuthStore();
+  const { companyId } = useParams();
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <StatCard title="Employees Paid" value={payrollSummary.employeesPaid} />
-        <StatCard title="Gross Pay" value={currency(payrollSummary.grossPay)} />
-        <StatCard title="Net Pay" value={currency(payrollSummary.netPay)} />
-        <StatCard title="Statutory Deductions" value={currency(payrollSummary.statutory)} />
-        <Card className="rounded-md border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-500">
-              Payroll Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="outline" className="text-slate-800">
-              {payrollSummary.status}
-            </Badge>
-          </CardContent>
-        </Card>
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/company/${companyId}/payroll/runs/latest-overview`, {
+          headers: { 'Authorization': `Bearer ${session?.access_token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch overview");
+        const result = await res.json();
+        setData(result);
+      } catch (err) {
+        console.error("Error fetching payroll overview:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (companyId && session?.access_token) {
+      fetchData();
+    }
+  }, [companyId, session?.access_token]);
+
+  if (loading) {
+    return <PayrollOverviewSkeleton />;
+  }
+
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+          <FileText className="h-10 w-10 text-slate-400" />
+        </div>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">No Payroll Data Available</h3>
+        <p className="text-sm text-slate-500 max-w-md">
+          There are no completed payroll runs to display. Complete a payroll run to see the overview.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 m-2">
+      {/* Header with improved status badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-1 bg-linear-to-b from-blue-600 to-blue-400 rounded-full" />
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+              Payroll Overview
+              <span className="text-sm font-normal text-slate-500 flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {data.summary.payrollMonth} {data.summary.payrollYear}
+              </span>
+            </h2>
+            <p className="text-sm text-slate-500">
+              Summary of payroll costs and distributions
+            </p>
+          </div>
+        </div>
+        <Badge 
+          variant="outline" 
+          className={cn("px-3 py-1.5 text-sm font-medium rounded-full", getStatusColor(data.summary.status))}
+        >
+          {data.summary.status}
+        </Badge>
       </div>
 
-      {/* Charts */}
+      {/* KPI Cards with icons and improved styling */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard 
+          title="Employees" 
+          value={formatNumber(data.summary.employeesPaid)}
+          icon={<Users className="h-5 w-5 text-blue-600" />}
+          trend="+12 from last month"
+          trendUp={true}
+        />
+        <StatCard 
+          title="Gross Pay" 
+          value={currency(data.summary.grossPay)}
+          icon={<Wallet className="h-5 w-5 text-emerald-600" />}
+          description="Total earnings before deductions"
+        />
+        <StatCard 
+          title="Net Pay" 
+          value={currency(data.summary.netPay)}
+          icon={<TrendingUp className="h-5 w-5 text-violet-600" />}
+          description="Take-home pay after deductions"
+        />
+        <StatCard 
+          title="Statutory Deductions" 
+          value={currency(data.summary.statutory)}
+          icon={<FileText className="h-5 w-5 text-amber-600" />}
+          description="PAYE, NSSF, NHIF, etc."
+        />
+      </div>
+
+      {/* Charts Grid with improved cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Payroll Breakdown */}
-        <ChartCard title="Payroll Cost Breakdown">
-          <DonutChart data={payrollBreakdown} />
+        <ChartCard title="Payroll Cost Breakdown" subtitle="Distribution of payroll costs">
+          <DonutChart 
+            data={data.breakdown} 
+            colors={CHART_COLORS.primary}
+          />
         </ChartCard>
 
-        {/* Statutory */}
-        <ChartCard title="Statutory Deductions">
-          <DonutChart data={statutoryBreakdown} />
+        <ChartCard title="Statutory Deductions" subtitle="Breakdown by deduction type">
+          <DonutChart 
+            data={data.statutoryDetails} 
+            colors={CHART_COLORS.secondary}
+          />
         </ChartCard>
 
-        {/* Net Pay by Department */}
-        <ChartCard title="Net Pay by Department">
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={netPayByDepartment}>
-              <XAxis dataKey="department" />
-              <YAxis tickFormatter={(v) => `${v / 1000}k`} />
-              <Tooltip
-                formatter={(v: number) => currency(v)}
-                cursor={{ fill: "rgba(0,0,0,0.04)" }}
+        <ChartCard title="Net Pay by Department" subtitle="Department-wise distribution">
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart 
+              data={data.departmentalNetPay} 
+              margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+              barGap={8}
+              barSize={32}
+            >
+              <XAxis 
+                dataKey="department" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#64748b', fontSize: 12 }}
               />
-              <Bar dataKey="netPay" radius={[6, 6, 0, 0]}>
-                {netPayByDepartment.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <YAxis 
+                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#64748b', fontSize: 12 }}
+              />
+              <Tooltip
+                formatter={(v: number | undefined) => currency(v)}
+                contentStyle={{ 
+                  borderRadius: 8, 
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  padding: '8px 12px'
+                }}
+                cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+              />
+              <Bar 
+                dataKey="netPay" 
+                radius={[4, 4, 0, 0]}
+              >
+                {data.departmentalNetPay.map((entry: DepartmentalData, i: number) => (
+                  <Cell 
+                    key={`cell-${i}`} 
+                    fill={entry.netPay > 0 ? CHART_COLORS.accent[i % CHART_COLORS.accent.length] : "#e2e8f0"} 
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -121,62 +257,157 @@ const PayrollOverview = () => {
   );
 };
 
-export default PayrollOverview;
-
 /* ---------- Helpers ---------- */
 
-const StatCard = ({ title, value }: { title: string; value: any }) => (
-  <Card className="rounded-md border">
-    <CardHeader className="pb-2">
-      <CardTitle className="text-sm text-slate-500">
-        {title}
-      </CardTitle>
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon?: React.ReactNode;
+  description?: string;
+  trend?: string;
+  trendUp?: boolean;
+}
+
+const StatCard = ({ title, value, icon, description, trend, trendUp }: StatCardProps) => (
+  <Card className="rounded-sm border border-slate-200 hover:border-slate-300 transition-colors">
+    <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+      <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
+      {icon && (
+        <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center">
+          {icon}
+        </div>
+      )}
     </CardHeader>
-    <CardContent className="text-lg font-semibold text-slate-900">
-      {value}
+    <CardContent>
+      <div className="text-2xl font-bold text-slate-900">{value}</div>
+      {description && (
+        <p className="text-xs text-slate-500 mt-1">{description}</p>
+      )}
+      {trend && (
+        <p className={cn(
+          "text-xs mt-2 flex items-center gap-1",
+          trendUp ? "text-emerald-600" : "text-amber-600"
+        )}>
+          {trendUp ? "↑" : "↓"} {trend}
+        </p>
+      )}
     </CardContent>
   </Card>
 );
 
-const ChartCard = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <Card className="rounded-md border">
-    <CardHeader>
-      <CardTitle className="text-sm font-medium text-slate-700">
-        {title}
-      </CardTitle>
+const ChartCard = ({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) => (
+  <Card className="rounded-sm border border-slate-200 overflow-hidden hover:border-slate-300 transition-colors">
+    <CardHeader className="bg-linear-to-r from-slate-50 to-white border-b border-slate-100 pb-3">
+      <CardTitle className="text-sm font-semibold text-slate-800">{title}</CardTitle>
+      {subtitle && (
+        <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+      )}
     </CardHeader>
-    <CardContent>{children}</CardContent>
+    <CardContent className="pt-4 px-3">
+      {children}
+    </CardContent>
   </Card>
 );
 
-const DonutChart = ({ data }: { data: any[] }) => (
-  <ResponsiveContainer width="100%" height={260}>
-    <PieChart>
-      <Pie
-        data={data}
-        innerRadius={60}
-        outerRadius={90}
-        dataKey="value"
-        paddingAngle={2}
-      >
-        {data.map((_, i) => (
-          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-        ))}
-      </Pie>
-      <Tooltip
-        formatter={(v: number) => currency(v)}
-        contentStyle={{
-          borderRadius: 8,
-          borderColor: "#e5e7eb",
-        }}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-    </PieChart>
-  </ResponsiveContainer>
+interface DonutChartProps {
+  data: ChartDataItem[];
+  colors?: string[];
+}
+
+const DonutChart = ({ data, colors = CHART_COLORS.neutral }: DonutChartProps) => {
+  // Filter out zero values to avoid empty slices
+  const filteredData = data.filter(item => item.value > 0);
+  
+  if (filteredData.length === 0) {
+    return (
+      <div className="h-65 flex items-center justify-center">
+        <p className="text-sm text-slate-400">No data available</p>
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <PieChart>
+        <Pie
+          data={filteredData}
+          innerRadius={65}
+          outerRadius={90}
+          dataKey="value"
+          paddingAngle={3}
+          cornerRadius={4}
+        >
+          {filteredData.map((_, i: number) => (
+            <Cell 
+              key={`cell-${i}`} 
+              fill={colors[i % colors.length]} 
+              stroke="white"
+              strokeWidth={2}
+            />
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(v: number | undefined) => currency(v)}
+          contentStyle={{ 
+            borderRadius: 8, 
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            padding: '8px 12px'
+          }}
+        />
+        <Legend 
+          verticalAlign="bottom" 
+          height={36}
+          formatter={(value) => <span className="text-xs text-slate-600">{value}</span>}
+          iconSize={8}
+          iconType="circle"
+        />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+};
+
+const PayrollOverviewSkeleton = () => (
+  <div className="space-y-6">
+    {/* Header Skeleton */}
+    <div className="flex items-center gap-3">
+      <Skeleton className="h-10 w-1 rounded-full" />
+      <div>
+        <Skeleton className="h-7 w-48 mb-2" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+    </div>
+
+    {/* KPI Cards Skeleton */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[1, 2, 3, 4].map((i) => (
+        <Card key={i} className="rounded-lg border border-slate-200">
+          <CardHeader className="pb-2">
+            <Skeleton className="h-4 w-24" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-3 w-40" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
+    {/* Charts Skeleton */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i} className="rounded-lg border border-slate-200">
+          <CardHeader className="bg-slate-50 border-b border-slate-100">
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-3 w-48 mt-1" />
+          </CardHeader>
+          <CardContent className="h-70 flex items-center justify-center">
+            <Skeleton className="h-40 w-40 rounded-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
 );
+
+export default PayrollOverview;

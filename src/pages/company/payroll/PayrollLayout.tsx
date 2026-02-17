@@ -13,7 +13,7 @@ export default function PayrollLayout() {
   const navigate = useNavigate();
 
   return (
-    <section className="flex h-full bg-gray-50 overflow-hidden">
+    <section className="flex h-full bg-slate-50 overflow-hidden">
       {/* Sidebar (sticky, non-scrolling) */}
       <PayrollSidebar />
 
