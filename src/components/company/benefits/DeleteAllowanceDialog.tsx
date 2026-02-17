@@ -60,7 +60,7 @@ export default function DeleteAllowanceDialog({ allowance, companyId, isOpen, on
         </DialogHeader>
         <p>
           Are you sure you want to delete the allowance <b>{allowance.allowance_types.name}</b> for employee{" "}
-          <b>{`${allowance.employees.first_name} ${allowance.employees.last_name}`}</b>? This action cannot be undone.
+          <b>{`${allowance.employees?.first_name} ${allowance.employees?.last_name}`}</b>? This action cannot be undone.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
