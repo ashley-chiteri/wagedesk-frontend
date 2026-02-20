@@ -41,7 +41,9 @@ export default function AssignDeductions() {
   const navigate = useNavigate();
   const { session } = useAuthStore();
 
-  const [assignedDeductions, setAssignedDeductions] = useState<AssignedDeduction[]>([]);
+  const [assignedDeductions, setAssignedDeductions] = useState<
+    AssignedDeduction[]
+  >([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [deductionTypes, setDeductionTypes] = useState<DeductionType[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -57,7 +59,8 @@ export default function AssignDeductions() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [selectedDeduction, setSelectedDeduction] = useState<AssignedDeduction | null>(null);
+  const [selectedDeduction, setSelectedDeduction] =
+    useState<AssignedDeduction | null>(null);
   const [deductionsToDelete, setDeductionsToDelete] = useState<string[]>([]);
 
   const fetchData = useCallback(async () => {
@@ -65,7 +68,7 @@ export default function AssignDeductions() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const headers = { Authorization: `Bearer ${session?.access_token}` };
 
@@ -79,16 +82,22 @@ export default function AssignDeductions() {
       ] = await Promise.all([
         fetch(`${API_BASE_URL}/company/${companyId}/deductions`, { headers }),
         fetch(`${API_BASE_URL}/company/${companyId}/employees`, { headers }),
-        fetch(`${API_BASE_URL}/company/${companyId}/deduction-types`, { headers }),
+        fetch(`${API_BASE_URL}/company/${companyId}/deduction-types`, {
+          headers,
+        }),
         fetch(`${API_BASE_URL}/company/${companyId}/departments`, { headers }),
-        fetch(`${API_BASE_URL}/company/${companyId}/sub-departments`, { headers }),
+        fetch(`${API_BASE_URL}/company/${companyId}/sub-departments`, {
+          headers,
+        }),
         fetch(`${API_BASE_URL}/company/${companyId}/job-titles`, { headers }),
       ]);
 
       if (!deductionsResponse.ok) throw new Error("Failed to fetch deductions");
       if (!employeesResponse.ok) throw new Error("Failed to fetch employees");
-      if (!deductionTypesResponse.ok) throw new Error("Failed to fetch deduction types");
-      if (!departmentsResponse.ok) throw new Error("Failed to fetch departments");
+      if (!deductionTypesResponse.ok)
+        throw new Error("Failed to fetch deduction types");
+      if (!departmentsResponse.ok)
+        throw new Error("Failed to fetch departments");
 
       const deductionsData = await deductionsResponse.json();
       const employeesData = await employeesResponse.json();
@@ -158,47 +167,54 @@ export default function AssignDeductions() {
   };
 
   return (
-    <div className="p-4">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 cursor-pointer"
-            onClick={() =>
-              navigate(`/company/${companyId}/payroll/settings/deductions`)
-            }
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Back to Deductions Settings</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Card className="mt-1 rounded-sm border border-slate-200 shadow-none">
+    <div className="p-2 space-y-4">
+      <Card className="rounded-sm border border-slate-200 shadow-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex flex-col">
-            <CardTitle className="text-2xl font-bold">
-              Assigned Deductions
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              View and manage deductions assigned to employees, departments, or job titles.
-            </CardDescription>
+            <div className="flex gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        `/company/${companyId}/payroll/deductions/overview`,
+                      )
+                    }
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Deductions Settings</p>
+                </TooltipContent>
+              </Tooltip>
+              <div>
+                <CardTitle className="text-2xl font-bold">
+                  Assigned Deductions
+                </CardTitle>
+                <CardDescription className="text-sm text-gray-500">
+                  View and manage deductions assigned to employees, departments,
+                  or job titles.
+                </CardDescription>
+              </div>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsImportDialogOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 cursor-pointer rounded-sm shadow-none border border-slate-300"
             >
               <FileUp className="h-4 w-4" /> Bulk Import
             </Button>
             <Button
+              size="sm"
               onClick={() => setIsAddDialogOpen(true)}
-              className="bg-[#7F5EFD] text-white hover:bg-[#6a4ad3]"
+              className="bg-[#1F3A8A] cursor-pointer rounded-sm shadow-none text-white hover:bg-[#6a4ad3]"
             >
               Assign Deduction
             </Button>

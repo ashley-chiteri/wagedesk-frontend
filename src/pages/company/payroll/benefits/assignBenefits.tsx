@@ -19,7 +19,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import AllowanceAssignTable, { Allowance } from "@/components/company/benefits/AllowanceAssignTable";
+import AllowanceAssignTable, {
+  Allowance,
+} from "@/components/company/benefits/AllowanceAssignTable";
 import AddAllowanceDialog from "@/components/company/benefits/AddAllowanceDialog";
 import EditAllowanceDialog from "@/components/company/benefits/EditAllowanceDialog";
 import DeleteAllowanceDialog from "@/components/company/benefits/DeleteAllowanceDialog";
@@ -30,7 +32,7 @@ export default function AssignBenefits() {
   const { companyId } = useParams();
   const { session } = useAuthStore();
   const navigate = useNavigate();
-  
+
   const [allowances, setAllowances] = useState<Allowance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,9 @@ export default function AssignBenefits() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [selectedAllowance, setSelectedAllowance] = useState<Allowance | null>(null);
+  const [selectedAllowance, setSelectedAllowance] = useState<Allowance | null>(
+    null,
+  );
   const [allowancesToDelete, setAllowancesToDelete] = useState<string[]>([]);
 
   const fetchData = useCallback(async () => {
@@ -49,7 +53,7 @@ export default function AssignBenefits() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/company/${companyId}/allowances`,
@@ -57,7 +61,7 @@ export default function AssignBenefits() {
           headers: {
             Authorization: `Bearer ${session?.access_token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -69,7 +73,9 @@ export default function AssignBenefits() {
       setAllowances(data);
     } catch (err) {
       console.error("Error fetching allowances:", err);
-      setError(err instanceof Error ? err.message : "Failed to load allowances");
+      setError(
+        err instanceof Error ? err.message : "Failed to load allowances",
+      );
       toast.error("Failed to load allowances. Please try again.");
     } finally {
       setLoading(false);
@@ -130,45 +136,56 @@ export default function AssignBenefits() {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 cursor-pointer"
-            onClick={() => navigate(`/company/${companyId}/payroll/settings/benefits`)}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Back to Benefits Settings</p>
-        </TooltipContent>
-      </Tooltip>
-
+    <div className="p-2 space-y-4">
       <Card className="rounded-sm border border-slate-200 shadow-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex flex-col">
-            <CardTitle className="text-2xl font-bold">
-              Assigned Allowances
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              Manage allowances assigned to employees, departments, and job titles.
+            <div className="flex gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        `/company/${companyId}/payroll/benefits/overview`,
+                      )
+                    }
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Benefits Settings</p>
+                </TooltipContent>
+              </Tooltip>
+              <div>
+                <CardTitle className="text-2xl font-bold">
+                Assigned Allowances
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+              Manage allowances assigned to employees, departments, and job
+              titles.
             </CardDescription>
+              </div>
+              
+            </div>
+
+            
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsImportDialogOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 cursor-pointer rounded-sm shadow-none border border-slate-300"
             >
               <FileUp className="h-4 w-4" /> Bulk Import
             </Button>
             <Button
               size="sm"
-              className="bg-[#7F5EFD] cursor-pointer text-white hover:bg-[#6a4ad3]"
+              className="bg-[#1F3A8A] cursor-pointer rounded-sm shadow-none text-white hover:bg-[#6a4ad3]"
               onClick={() => setIsAddDialogOpen(true)}
             >
               Assign Allowance

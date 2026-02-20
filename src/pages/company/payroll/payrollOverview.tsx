@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { API_BASE_URL } from "@/config";
-import { useParams } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   PieChart,
   Pie,
@@ -22,7 +17,15 @@ import {
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Users, Wallet, FileText, Calendar } from "lucide-react";
+import {
+  TrendingUp,
+  Users,
+  Wallet,
+  FileText,
+  Calendar,
+  ArrowLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /* --- Types & Interfaces --- */
@@ -96,14 +99,18 @@ const PayrollOverview = () => {
   const [loading, setLoading] = useState(true);
   const { session } = useAuthStore();
   const { companyId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/company/${companyId}/payroll/runs/latest-overview`, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/company/${companyId}/payroll/runs/latest-overview`,
+          {
+            headers: { Authorization: `Bearer ${session?.access_token}` },
+          },
+        );
         if (!res.ok) throw new Error("Failed to fetch overview");
         const result = await res.json();
         setData(result);
@@ -128,19 +135,38 @@ const PayrollOverview = () => {
         <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
           <FileText className="h-10 w-10 text-slate-400" />
         </div>
-        <h3 className="text-lg font-medium text-slate-900 mb-2">No Payroll Data Available</h3>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 cursor-pointer"
+          onClick={() => navigate(`/company/${companyId}/modules`)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">
+          No Payroll Data Available
+        </h3>
         <p className="text-sm text-slate-500 max-w-md">
-          There are no completed payroll runs to display. Complete a payroll run to see the overview.
+          There are no completed payroll runs to display. Complete a payroll run
+          to see the overview.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 m-2">
+    <div className="space-y-6 m-4">
       {/* Header with improved status badge */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 cursor-pointer"
+            onClick={() => navigate(`/company/${companyId}/modules`)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <div className="h-10 w-1 bg-linear-to-b from-blue-600 to-blue-400 rounded-full" />
           <div>
             <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
@@ -155,9 +181,12 @@ const PayrollOverview = () => {
             </p>
           </div>
         </div>
-        <Badge 
-          variant="outline" 
-          className={cn("px-3 py-1.5 text-sm font-medium rounded-full", getStatusColor(data.summary.status))}
+        <Badge
+          variant="outline"
+          className={cn(
+            "px-3 py-1.5 text-sm font-medium rounded-full",
+            getStatusColor(data.summary.status),
+          )}
         >
           {data.summary.status}
         </Badge>
@@ -165,27 +194,27 @@ const PayrollOverview = () => {
 
       {/* KPI Cards with icons and improved styling */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Employees" 
+        <StatCard
+          title="Employees"
           value={formatNumber(data.summary.employeesPaid)}
           icon={<Users className="h-5 w-5 text-blue-600" />}
           trend="+12 from last month"
           trendUp={true}
         />
-        <StatCard 
-          title="Gross Pay" 
+        <StatCard
+          title="Gross Pay"
           value={currency(data.summary.grossPay)}
           icon={<Wallet className="h-5 w-5 text-emerald-600" />}
           description="Total earnings before deductions"
         />
-        <StatCard 
-          title="Net Pay" 
+        <StatCard
+          title="Net Pay"
           value={currency(data.summary.netPay)}
           icon={<TrendingUp className="h-5 w-5 text-violet-600" />}
           description="Take-home pay after deductions"
         />
-        <StatCard 
-          title="Statutory Deductions" 
+        <StatCard
+          title="Statutory Deductions"
           value={currency(data.summary.statutory)}
           icon={<FileText className="h-5 w-5 text-amber-600" />}
           description="PAYE, NSSF, NHIF, etc."
@@ -194,60 +223,69 @@ const PayrollOverview = () => {
 
       {/* Charts Grid with improved cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ChartCard title="Payroll Cost Breakdown" subtitle="Distribution of payroll costs">
-          <DonutChart 
-            data={data.breakdown} 
-            colors={CHART_COLORS.primary}
-          />
+        <ChartCard
+          title="Payroll Cost Breakdown"
+          subtitle="Distribution of payroll costs"
+        >
+          <DonutChart data={data.breakdown} colors={CHART_COLORS.primary} />
         </ChartCard>
 
-        <ChartCard title="Statutory Deductions" subtitle="Breakdown by deduction type">
-          <DonutChart 
-            data={data.statutoryDetails} 
+        <ChartCard
+          title="Statutory Deductions"
+          subtitle="Breakdown by deduction type"
+        >
+          <DonutChart
+            data={data.statutoryDetails}
             colors={CHART_COLORS.secondary}
           />
         </ChartCard>
 
-        <ChartCard title="Net Pay by Department" subtitle="Department-wise distribution">
+        <ChartCard
+          title="Net Pay by Department"
+          subtitle="Department-wise distribution"
+        >
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart 
-              data={data.departmentalNetPay} 
+            <BarChart
+              data={data.departmentalNetPay}
               margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
               barGap={8}
               barSize={32}
             >
-              <XAxis 
-                dataKey="department" 
+              <XAxis
+                dataKey="department"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748b', fontSize: 12 }}
+                tick={{ fill: "#64748b", fontSize: 12 }}
               />
-              <YAxis 
+              <YAxis
                 tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748b', fontSize: 12 }}
+                tick={{ fill: "#64748b", fontSize: 12 }}
               />
               <Tooltip
                 formatter={(v: number | undefined) => currency(v)}
-                contentStyle={{ 
-                  borderRadius: 8, 
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  padding: '8px 12px'
+                contentStyle={{
+                  borderRadius: 8,
+                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  padding: "8px 12px",
                 }}
-                cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                cursor={{ fill: "rgba(37, 99, 235, 0.05)" }}
               />
-              <Bar 
-                dataKey="netPay" 
-                radius={[4, 4, 0, 0]}
-              >
-                {data.departmentalNetPay.map((entry: DepartmentalData, i: number) => (
-                  <Cell 
-                    key={`cell-${i}`} 
-                    fill={entry.netPay > 0 ? CHART_COLORS.accent[i % CHART_COLORS.accent.length] : "#e2e8f0"} 
-                  />
-                ))}
+              <Bar dataKey="netPay" radius={[4, 4, 0, 0]}>
+                {data.departmentalNetPay.map(
+                  (entry: DepartmentalData, i: number) => (
+                    <Cell
+                      key={`cell-${i}`}
+                      fill={
+                        entry.netPay > 0
+                          ? CHART_COLORS.accent[i % CHART_COLORS.accent.length]
+                          : "#e2e8f0"
+                      }
+                    />
+                  ),
+                )}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -268,10 +306,19 @@ interface StatCardProps {
   trendUp?: boolean;
 }
 
-const StatCard = ({ title, value, icon, description, trend, trendUp }: StatCardProps) => (
+const StatCard = ({
+  title,
+  value,
+  icon,
+  description,
+  trend,
+  trendUp,
+}: StatCardProps) => (
   <Card className="rounded-sm border border-slate-200 hover:border-slate-300 transition-colors">
     <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-      <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
+      <CardTitle className="text-sm font-medium text-slate-600">
+        {title}
+      </CardTitle>
       {icon && (
         <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center">
           {icon}
@@ -284,10 +331,12 @@ const StatCard = ({ title, value, icon, description, trend, trendUp }: StatCardP
         <p className="text-xs text-slate-500 mt-1">{description}</p>
       )}
       {trend && (
-        <p className={cn(
-          "text-xs mt-2 flex items-center gap-1",
-          trendUp ? "text-emerald-600" : "text-amber-600"
-        )}>
+        <p
+          className={cn(
+            "text-xs mt-2 flex items-center gap-1",
+            trendUp ? "text-emerald-600" : "text-amber-600",
+          )}
+        >
           {trendUp ? "↑" : "↓"} {trend}
         </p>
       )}
@@ -295,17 +344,23 @@ const StatCard = ({ title, value, icon, description, trend, trendUp }: StatCardP
   </Card>
 );
 
-const ChartCard = ({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) => (
+const ChartCard = ({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) => (
   <Card className="rounded-sm border border-slate-200 overflow-hidden hover:border-slate-300 transition-colors">
     <CardHeader className="bg-linear-to-r from-slate-50 to-white border-b border-slate-100 pb-3">
-      <CardTitle className="text-sm font-semibold text-slate-800">{title}</CardTitle>
-      {subtitle && (
-        <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
-      )}
+      <CardTitle className="text-sm font-semibold text-slate-800">
+        {title}
+      </CardTitle>
+      {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
     </CardHeader>
-    <CardContent className="pt-4 px-3">
-      {children}
-    </CardContent>
+    <CardContent className="pt-4 px-3">{children}</CardContent>
   </Card>
 );
 
@@ -314,10 +369,13 @@ interface DonutChartProps {
   colors?: string[];
 }
 
-const DonutChart = ({ data, colors = CHART_COLORS.neutral }: DonutChartProps) => {
+const DonutChart = ({
+  data,
+  colors = CHART_COLORS.neutral,
+}: DonutChartProps) => {
   // Filter out zero values to avoid empty slices
-  const filteredData = data.filter(item => item.value > 0);
-  
+  const filteredData = data.filter((item) => item.value > 0);
+
   if (filteredData.length === 0) {
     return (
       <div className="h-65 flex items-center justify-center">
@@ -338,9 +396,9 @@ const DonutChart = ({ data, colors = CHART_COLORS.neutral }: DonutChartProps) =>
           cornerRadius={4}
         >
           {filteredData.map((_, i: number) => (
-            <Cell 
-              key={`cell-${i}`} 
-              fill={colors[i % colors.length]} 
+            <Cell
+              key={`cell-${i}`}
+              fill={colors[i % colors.length]}
               stroke="white"
               strokeWidth={2}
             />
@@ -348,17 +406,19 @@ const DonutChart = ({ data, colors = CHART_COLORS.neutral }: DonutChartProps) =>
         </Pie>
         <Tooltip
           formatter={(v: number | undefined) => currency(v)}
-          contentStyle={{ 
-            borderRadius: 8, 
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            padding: '8px 12px'
+          contentStyle={{
+            borderRadius: 8,
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+            padding: "8px 12px",
           }}
         />
-        <Legend 
-          verticalAlign="bottom" 
+        <Legend
+          verticalAlign="bottom"
           height={36}
-          formatter={(value) => <span className="text-xs text-slate-600">{value}</span>}
+          formatter={(value) => (
+            <span className="text-xs text-slate-600">{value}</span>
+          )}
           iconSize={8}
           iconType="circle"
         />
@@ -368,7 +428,7 @@ const DonutChart = ({ data, colors = CHART_COLORS.neutral }: DonutChartProps) =>
 };
 
 const PayrollOverviewSkeleton = () => (
-  <div className="space-y-6">
+  <div className="space-y-6 m-4">
     {/* Header Skeleton */}
     <div className="flex items-center gap-3">
       <Skeleton className="h-10 w-1 rounded-full" />

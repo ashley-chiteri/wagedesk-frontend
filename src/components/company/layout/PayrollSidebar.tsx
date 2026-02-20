@@ -5,6 +5,8 @@ import {
   PlayCircle,
   Mail,
   BarChart3,
+  Briefcase,
+  Layers,
   Settings,
 } from "lucide-react";
 
@@ -34,8 +36,20 @@ export default function PayrollSidebar() {
       icon: BarChart3,
     },
     {
+      label: "Benefits",
+      href: `/company/${companyId}/payroll/benefits`,
+      icon: Briefcase,
+       exact: false,
+    },
+    {
+      label: "Deductions",
+      href: `/company/${companyId}/payroll/deductions`,
+      icon: Layers,
+       exact: false,
+    },
+    {
       label: "Settings",
-      href: `/company/${companyId}/payroll/settings/benefits`,
+      href: `/company/${companyId}/payroll/settings/reviewers`,
       icon: Settings,
     },
   ];
@@ -53,14 +67,14 @@ export default function PayrollSidebar() {
                 "flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 group",
                 isActive
                   ? "bg-[#1F3A8A]/10 text-[#1F3A8A] translate-x-1"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-900"
+                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-900",
               )
             }
           >
             <item.icon
               className={clsx(
                 "mr-3 h-5 w-5 shrink-0 transition-colors",
-                "group-hover:text-slate-600"
+                "group-hover:text-slate-600",
               )}
             />
             {item.label}

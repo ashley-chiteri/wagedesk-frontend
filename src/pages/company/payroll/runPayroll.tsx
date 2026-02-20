@@ -10,6 +10,7 @@ import {
   FileText,
   Clock,
   ArrowUpRight,
+  ArrowLeft
 } from "lucide-react";
 import { format, getYear } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { API_BASE_URL } from "@/config";
 import { useAuthStore } from "@/stores/authStore";
@@ -123,7 +128,7 @@ export default function RunPayroll() {
           headers: { Authorization: `Bearer ${session?.access_token}` },
         },
       );
-     if (response.ok) {
+      if (response.ok) {
         const data = await response.json();
         setExistingRuns(data);
       }
@@ -169,30 +174,51 @@ export default function RunPayroll() {
     }
   };
 
-return (
+  return (
     <div className="space-y-6">
-      <Card className="rounded-sm border-slate-300 shadow-none overflow-hidden">
+      <Card className="rounded-sm mt-4 border-slate-300 shadow-none overflow-hidden">
         <CardContent className="p-0">
           <div className="grid grid-cols-1 md:grid-cols-3">
             {/* Left: Main Action */}
             <div className="p-8 border-r border-slate-100 flex flex-col justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Payroll Processing</h2>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 cursor-pointer"
+                      onClick={() => navigate(`/company/${companyId}/modules`)}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Back</p>
+                  </TooltipContent>
+                </Tooltip>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Payroll Processing
+                </h2>
                 <p className="text-slate-500 mt-2 text-sm leading-relaxed">
-                  Manage your monthly payroll cycles, recalculate statutory deductions, and prepare disbursements.
+                  Manage your monthly payroll cycles, recalculate statutory
+                  deductions, and prepare disbursements.
                 </p>
               </div>
-              
+
               <div className="mt-8">
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="w-full bg-[#1F3A8A] hover:bg-[#162a63] rounded-sm shadow-none group cursor-pointer">
+                    <Button
+                      size="lg"
+                      className="w-full bg-[#1F3A8A] hover:bg-[#162a63] rounded-sm shadow-none group cursor-pointer"
+                    >
                       <TrendingUp className="mr-2 h-5 w-5" />
                       Prepare New Cycle
                       <ChevronRight className="ml-auto h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </DialogTrigger>
-                  
+
                   <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
                       <DialogTitle>Process Payroll Cycle</DialogTitle>
@@ -204,37 +230,62 @@ return (
                     <div className="grid grid-cols-2 gap-4 py-4">
                       <div className="space-y-2">
                         <Label>Payroll Month</Label>
-                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        <Select
+                          value={selectedMonth}
+                          onValueChange={setSelectedMonth}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                            {months.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
                         <Label>Payroll Year</Label>
-                        <Select value={selectedYear} onValueChange={setSelectedYear}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        <Select
+                          value={selectedYear}
+                          onValueChange={setSelectedYear}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
+                            {years.map((y) => (
+                              <SelectItem key={y} value={y.toString()}>
+                                {y}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
 
-                    <ExistingRunPreview 
-                      month={selectedMonth} 
-                      year={parseInt(selectedYear)} 
+                    <ExistingRunPreview
+                      month={selectedMonth}
+                      year={parseInt(selectedYear)}
                     />
 
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                      <Button 
-                        onClick={handleProcessPayroll} 
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleProcessPayroll}
                         disabled={loading}
                         className="bg-[#1F3A8A] cursor-pointer"
                       >
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {loading && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         Initialize Cycle
                       </Button>
                     </DialogFooter>
@@ -246,32 +297,48 @@ return (
             {/* Center: Current Status Stats */}
             <div className="p-8 border-r border-slate-100 bg-slate-50/30 space-y-6">
               <div className="space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Current Status</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Current Status
+                </span>
                 <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${summary?.current_month.exists ? 'bg-amber-100' : 'bg-slate-100'}`}>
-                    <Clock className={`h-5 w-5 ${summary?.current_month.exists ? 'text-amber-600' : 'text-slate-400'}`} />
+                  <div
+                    className={`h-10 w-10 rounded-full flex items-center justify-center ${summary?.current_month.exists ? "bg-amber-100" : "bg-slate-100"}`}
+                  >
+                    <Clock
+                      className={`h-5 w-5 ${summary?.current_month.exists ? "text-amber-600" : "text-slate-400"}`}
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
-                      {summary?.current_month.exists ? (summary.current_month.status || 'Draft in Progress') : 'No Active Cycle'}
+                      {summary?.current_month.exists
+                        ? summary.current_month.status || "Draft in Progress"
+                        : "No Active Cycle"}
                     </p>
-                    <p className="text-xs text-slate-500">{summary?.pending_approvals || 0} items pending approval</p>
+                    <p className="text-xs text-slate-500">
+                      {summary?.pending_approvals || 0} items pending approval
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last Processed</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Last Processed
+                </span>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
-                      {existingRuns.length > 0 ? `${existingRuns[0].payroll_month} ${existingRuns[0].payroll_year}` : 'N/A'}
+                      {existingRuns.length > 0
+                        ? `${existingRuns[0].payroll_month} ${existingRuns[0].payroll_year}`
+                        : "N/A"}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {existingRuns.length > 0 ? `ID: ${existingRuns[0].payroll_number}` : 'No history found'}
+                      {existingRuns.length > 0
+                        ? `ID: ${existingRuns[0].payroll_number}`
+                        : "No history found"}
                     </p>
                   </div>
                 </div>
@@ -284,11 +351,12 @@ return (
                 <p className="text-sm text-slate-500">Year-to-Date Gross</p>
                 <div className="flex items-baseline gap-2">
                   <h3 className="text-2xl font-bold text-slate-900">
-                    KES {summary?.yearly_total_gross?.toLocaleString() || '0'}
+                    KES {summary?.yearly_total_gross?.toLocaleString() || "0"}
                   </h3>
                   {summary?.growth_percentage && (
                     <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-medium">
-                      <ArrowUpRight className="h-3 w-3 mr-1" /> {summary.growth_percentage}%
+                      <ArrowUpRight className="h-3 w-3 mr-1" />{" "}
+                      {summary.growth_percentage}%
                     </Badge>
                   )}
                 </div>
@@ -296,12 +364,20 @@ return (
               <Separator />
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs text-slate-500 uppercase font-medium">Headcount</p>
+                  <p className="text-xs text-slate-500 uppercase font-medium">
+                    Headcount
+                  </p>
                   <p className="text-lg font-semibold text-slate-800">
                     {existingRuns[0]?.employee_count || 0} Employees
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => navigate(`/company/${companyId}/payroll/history`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    navigate(`/company/${companyId}/payroll/history`)
+                  }
+                >
                   View History
                 </Button>
               </div>
@@ -313,29 +389,43 @@ return (
       {/* Recent History Table Style */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">Recent Payroll Runs</h3>
-          <Button variant="link" className="text-[#1F3A8A] cursor-pointer" onClick={() => navigate(`/company/${companyId}/payroll/history`)}>
+          <h3 className="text-lg font-semibold text-slate-900">
+            Recent Payroll Runs
+          </h3>
+          <Button
+            variant="link"
+            className="text-[#1F3A8A] cursor-pointer"
+            onClick={() => navigate(`/company/${companyId}/payroll/history`)}
+          >
             View all records
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/*show card skeleton for the loading state*/}
-          {summaryLoading && [1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse border-slate-200 shadow-sm">
-              <CardContent className="p-5">
-                <div className="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-slate-200 rounded w-1/2 mb-4"></div>
-                <div className="h-3 bg-slate-200 rounded w-full mb-2"></div>
-                <div className="h-3 bg-slate-200 rounded w-5/6"></div>
-              </CardContent>
-            </Card>
-          ))} 
+          {summaryLoading &&
+            [1, 2, 3].map((i) => (
+              <Card
+                key={i}
+                className="animate-pulse border-slate-200 shadow-sm"
+              >
+                <CardContent className="p-5">
+                  <div className="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-slate-200 rounded w-1/2 mb-4"></div>
+                  <div className="h-3 bg-slate-200 rounded w-full mb-2"></div>
+                  <div className="h-3 bg-slate-200 rounded w-5/6"></div>
+                </CardContent>
+              </Card>
+            ))}
           {existingRuns.slice(0, 3).map((run) => (
-            <Card 
-              key={run.id} 
+            <Card
+              key={run.id}
               className="hover:border-[#1F3A8A]/30 cursor-pointer transition-all hover:shadow-md rounded-sm group"
-              onClick={() => navigate(`/company/${companyId}/payroll/${run.id}/review-status`)}
+              onClick={() =>
+                navigate(
+                  `/company/${companyId}/payroll/${run.id}/review-status`,
+                )
+              }
             >
               <CardContent className="p-5">
                 <div className="flex justify-between items-start mb-4">
@@ -347,31 +437,42 @@ return (
                   </Badge>
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900">{run.payroll_month} {run.payroll_year}</p>
-                  <p className="text-xs text-slate-500 uppercase tracking-tighter mb-3">{run.payroll_number}</p>
+                  <p className="font-bold text-slate-900">
+                    {run.payroll_month} {run.payroll_year}
+                  </p>
+                  <p className="text-xs text-slate-500 uppercase tracking-tighter mb-3">
+                    {run.payroll_number}
+                  </p>
                   <div className="flex justify-between items-center bg-slate-50 p-2 rounded-md">
                     <span className="text-xs text-slate-500">Net Payable:</span>
-                    <span className="text-sm font-bold text-slate-900">KES {run.total_net_pay.toLocaleString()}</span>
+                    <span className="text-sm font-bold text-slate-900">
+                      KES {run.total_net_pay.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))} 
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-function ExistingRunPreview({ month, year }: { month: string, year: number }) {
+function ExistingRunPreview({ month, year }: { month: string; year: number }) {
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 my-2">
-       <div className="flex items-center gap-3 text-slate-600">
-         <AlertCircle className="h-5 w-5" />
-         <p className="text-sm">
-           Initializing for <strong>{month} {year}</strong>. This will recalculate all tax bands (PAYE) and statutory rates (NSSF/SHIF) based on current employee settings.
-         </p>
-       </div>
+      <div className="flex items-center gap-3 text-slate-600">
+        <AlertCircle className="h-5 w-5" />
+        <p className="text-sm">
+          Initializing for{" "}
+          <strong>
+            {month} {year}
+          </strong>
+          . This will recalculate all tax bands (PAYE) and statutory rates
+          (NSSF/SHIF) based on current employee settings.
+        </p>
+      </div>
     </div>
   );
 }

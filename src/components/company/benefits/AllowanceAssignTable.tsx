@@ -436,12 +436,12 @@ const AllowanceAssignTable: React.FC<Props> = ({
           placeholder="Search by employee, allowance type, or details..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
+          className="max-w-sm rounded-sm shadow-none"
         />
         <BulkDeleteButton table={table} onBulkDeleteClick={onBulkDelete} />
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-sm shadow-none px-2  border border-slate-300">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

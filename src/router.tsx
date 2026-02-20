@@ -21,13 +21,16 @@ import EmployeeAllowances from "./pages/company/employees/details/Allowances.tsx
 import PayrollLayout from "./pages/company/payroll/PayrollLayout.tsx";
 import RunPayroll from "./pages/company/payroll/runPayroll.tsx";
 import PayrollHistory from "./pages/company/payroll/PayrollHistory.tsx";
-import BenefitSettings from "./pages/company/payroll/settings/benefitSettings.tsx";
-import AssignBenefits from "./pages/company/payroll/settings/assignBenefits.tsx";
-import AssignDeductions from "./pages/company/payroll/settings/assignDeductions.tsx";
+import BenefitSettings from "./pages/company/payroll/benefits/benefitSection.tsx";
+import BenefitLayout from "./pages/company/payroll/benefits/benefitsLayout.tsx";
+import DeductionLayout from "./pages/company/payroll/deductions/deductionsLayout.tsx";
+import AssignBenefits from "./pages/company/payroll/benefits/assignBenefits.tsx";
+import AssignDeductions from "./pages/company/payroll/deductions/assignDeductions.tsx";
 import PayrollSettingsLayout from "./pages/company/payroll/settings/PayrollSettingsLayout.tsx";
 import PayrollWizard from "./components/payroll/runs/PayrollWizard.tsx";
 import PayrollReviewStatus from "./components/payroll/runs/PayrollReviewStatus.tsx";
-import DeductionSettings from "./pages/company/payroll/settings/deductionSettings.tsx";
+import DeductionSettings from "./pages/company/payroll/deductions/deductionSection.tsx";
+import HELBSection from "./pages/company/payroll/deductions/HELBSection.tsx";
 import Reviewers from "./pages/company/payroll/settings/reviewers.tsx";
 import SendPayslip from "./pages/company/payroll/SendPayslips.tsx";
 import PayrollOverview from "./pages/company/payroll/payrollOverview.tsx";
@@ -119,17 +122,23 @@ const AppRouterWrapper = () => {
               <Route path="run" element={<RunPayroll />} />
               <Route path="payslips" element={<SendPayslip />} />
               <Route path="history" element={<PayrollHistory />} />
+              <Route path="benefits" element={<BenefitLayout />}>
+                <Route index element={<Navigate to="overview" replace />} />
+                <Route path="overview" element={<BenefitSettings />} />
+              </Route>
+              <Route path="deductions" element={<DeductionLayout />}>
+                 <Route index element={<Navigate to="overview" replace />} />
+                <Route path="overview" element={<DeductionSettings />} />
+                <Route path="helb" element={<HELBSection />} />
+              </Route>
               <Route path="settings" element={<PayrollSettingsLayout />}>
-                <Route index element={<BenefitSettings />} />
-                <Route path="benefits" element={<BenefitSettings />} />
-                <Route path="deductions" element={<DeductionSettings />} />
                 <Route path="reviewers" element={<Reviewers />} />
-              </Route>              
+              </Route>
             </Route>
             <Route path="payroll/:payrollRunId">
-                <Route path="wizard" element={<PayrollWizard />} />
-                <Route path="review-status" element={<PayrollReviewStatus />} />
-              </Route>
+              <Route path="wizard" element={<PayrollWizard />} />
+              <Route path="review-status" element={<PayrollReviewStatus />} />
+            </Route>
             <Route path="benefits/assign" element={<AssignBenefits />} />
             <Route path="deductions/assign" element={<AssignDeductions />} />
             <Route path="payroll/setup" element={<PayrollSetup />} />

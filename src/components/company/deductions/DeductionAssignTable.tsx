@@ -352,12 +352,12 @@ const DeductionAssignTable: React.FC<Props> = ({
           placeholder="Search by deduction type or recipient..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
+          className="max-w-sm rounded-sm shadow-none"
         />
         <BulkDeleteButton table={table} onBulkDeleteClick={onBulkDeleteClick} />
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-sm shadow-none px-2  border border-slate-300">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

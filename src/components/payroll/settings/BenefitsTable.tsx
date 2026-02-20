@@ -259,7 +259,7 @@ export function AllowanceTable({ companyId }: Props) {
             setEditingItem(null);
             setOpenDialog(true);
           }}
-          className="bg-[#1F3A8A] hover:bg-[#162a63] cursor-pointer rounded-md h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
+          className="bg-[#1F3A8A] hover:bg-[#162a63] cursor-pointer rounded-sm shadow-none h-10 px-4 text-sm font-medium transition-all hover:-translate-y-0.5"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Allowance
