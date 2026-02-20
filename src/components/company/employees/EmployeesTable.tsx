@@ -334,7 +334,7 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error,  onDeleteSucces
             placeholder="Search by name or ID..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-9 bg-slate-50/50 border-slate-200 shadow-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="pl-9 bg-slate-50/50 border-slate-300 rounded-sm shadow-none focus-visible:ring-1 focus-visible:ring-blue-500"
           />
         </div>
 
@@ -371,7 +371,7 @@ const EmployeesTable: React.FC<Props> = ({ data, loading, error,  onDeleteSucces
         )}
       </div>
 
-      <div className="rounded-md border border-slate-200 px-2">
+      <div className="rounded-sm border border-slate-300 px-2">
         <Table>
           <TableHeader className="bg-slate-50/50">
             {table.getHeaderGroups().map((headerGroup) => (

@@ -70,8 +70,8 @@ export default function EmployeeSection() {
   };
 
   return (
-    <div className="min-h-full p-4 flex flex-col">
-      <Card className="flex flex-col flex-1 border border-slate-200 shadow-none rounded-sm">
+    <div className="min-h-full flex flex-col">
+      <Card className="flex flex-col flex-1 shadow-none rounded-none">
         <CardHeader className="flex flex-row items-center justify-between">
           <header className="space-y-1">
             <div className="flex items-center gap-3">

@@ -80,7 +80,7 @@ const EmailComposeDialog: React.FC<Props> = ({
       <DialogContent
         className="
           max-w-lg
-          rounded-lg
+          rounded-sm
           border border-slate-200
           shadow-sm
         "

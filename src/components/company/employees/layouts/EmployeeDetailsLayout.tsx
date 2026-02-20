@@ -22,7 +22,7 @@ export default function EmployeeDetailsLayout() {
     employeeId: string;
   }>();
   const navigate = useNavigate();
-  const { employee, loading, error } = useEmployee(companyId!, employeeId!);
+  const { employee, loading, error, refetch } = useEmployee(companyId!, employeeId!);
 
   const getInitials = () => {
     if (!employee) return "";
@@ -181,7 +181,7 @@ export default function EmployeeDetailsLayout() {
               {loading ? (
                 <LoadingSkeleton />
               ) : (
-                <Outlet context={{ employee, refetch: () => {} }} />
+                <Outlet context={{ employee, refetch }} />
               )}
             </div>
           </div>

@@ -1,7 +1,9 @@
 import {
   SectionDetailsHeader,
-  EditButton,
 } from "@/components/company/employees/employeeutils";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
 export default function EmployeeDeductions() {
   const statutoryDeductions = [
     { name: "PAYE", type: "Formula", value: "Custom" },
@@ -13,8 +15,13 @@ export default function EmployeeDeductions() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <SectionDetailsHeader title="Recurring Deductions" description="Automated payroll deductions for this employee." />
-        <EditButton />
+        <SectionDetailsHeader title="Deductions" description="Automated payroll deductions for this employee." />
+        <Button 
+    onClick={() => toast.info("Assigning deductions is disabled for the demo")}
+    className="flex bg-transparent items-center cursor-pointer gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-all shadow-none">
+      <Plus  />
+      Add
+    </Button>
       </div>
       
       <div className="border border-slate-200 rounded-lg overflow-hidden">

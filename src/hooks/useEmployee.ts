@@ -58,6 +58,6 @@ export const useEmployee = (companyId: string, employeeId: string) => {
     employee, 
     loading, 
     error, 
-    refetch: () => fetchEmployee(false) 
+    refetch: fetchEmployee 
   };
 };

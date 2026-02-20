@@ -70,3 +70,10 @@ export interface Employee {
     employee_payment_details: EmployeePaymentDetails | null;
     employee_contracts: EmployeeContract[];
 }
+
+export interface EditDialogProps {
+  employee: Employee;
+  isOpen: boolean;
+  onClose: () => void;
+  onRefresh: () => void;
+}

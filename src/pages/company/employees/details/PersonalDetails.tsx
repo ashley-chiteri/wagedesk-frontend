@@ -1,16 +1,27 @@
 // components/company/employees/PersonalDetails.tsx
-import { User, Contact, Fingerprint, Calendar, Heart, Globe } from "lucide-react";
-import { SectionDetailsHeader, EditButton } from "@/components/company/employees/employeeutils";
+import { useState } from "react";
+import {
+  User,
+  Contact,
+  Fingerprint,
+  Calendar,
+  Heart,
+  Globe,
+} from "lucide-react";
+import { SectionDetailsHeader } from "@/components/company/employees/employeeutils";
 import { useOutletContext } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import EditPersonalDetailsDialog from "@/components/company/employees/EditPersonalDetailsDialog";
 import { Employee } from "@/types/employees";
 
 interface OutletContext {
   employee: Employee;
+  refetch: () => void;
 }
 
 export default function PersonalDetails() {
-  const context = useOutletContext<OutletContext>();
-  const employee = context?.employee;
+  const { employee, refetch } = useOutletContext<OutletContext>();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   if (!employee) {
     return (
@@ -37,15 +48,27 @@ export default function PersonalDetails() {
           <section>
             <SectionDetailsHeader title="Identity" icon={User} />
             <div className="grid grid-cols-3 gap-8">
-              <DetailItem 
-                label="Full Name" 
-                value={`${employee.first_name} ${employee.middle_name || ''} ${employee.last_name}`.trim()} 
+              <DetailItem
+                label="Full Name"
+                value={`${employee.first_name} ${employee.middle_name || ""} ${employee.last_name}`.trim()}
               />
               <DetailItem label="Gender" value={employee.gender || "—"} />
-              <DetailItem label="Date of Birth" value={formatDate(employee.date_of_birth)} />
-              <DetailItem label="Marital Status" value={employee.marital_status || "—"} />
-              <DetailItem label="Citizenship" value={employee.citizenship || "—"} />
-              <DetailItem label="Blood Group" value={employee.blood_group || "—"} />
+              <DetailItem
+                label="Date of Birth"
+                value={formatDate(employee.date_of_birth)}
+              />
+              <DetailItem
+                label="Marital Status"
+                value={employee.marital_status || "—"}
+              />
+              <DetailItem
+                label="Citizenship"
+                value={employee.citizenship || "—"}
+              />
+              <DetailItem
+                label="Blood Group"
+                value={employee.blood_group || "—"}
+              />
             </div>
           </section>
 
@@ -60,16 +83,25 @@ export default function PersonalDetails() {
 
           {/* Section 3: Statutory IDs */}
           <section>
-            <SectionDetailsHeader title="Statutory Identifiers" icon={Fingerprint} />
+            <SectionDetailsHeader
+              title="Statutory Identifiers"
+              icon={Fingerprint}
+            />
             <div className="grid grid-cols-3 gap-8">
-              <DetailItem 
-                label="National ID / Passport" 
-                value={employee.id_number || "—"} 
+              <DetailItem
+                label="National ID / Passport"
+                value={employee.id_number || "—"}
                 hint={employee.id_type || ""}
               />
               <DetailItem label="KRA PIN" value={employee.krapin || "—"} />
-              <DetailItem label="NSSF Number" value={employee.nssf_number || "—"} />
-              <DetailItem label="SHIF Number" value={employee.shif_number || "—"} />
+              <DetailItem
+                label="NSSF Number"
+                value={employee.nssf_number || "—"}
+              />
+              <DetailItem
+                label="SHIF Number"
+                value={employee.shif_number || "—"}
+              />
             </div>
           </section>
 
@@ -77,9 +109,15 @@ export default function PersonalDetails() {
           <section>
             <SectionDetailsHeader title="Employment Details" icon={Calendar} />
             <div className="grid grid-cols-3 gap-8">
-              <DetailItem label="Hire Date" value={formatDate(employee.hire_date)} />
+              <DetailItem
+                label="Hire Date"
+                value={formatDate(employee.hire_date)}
+              />
               <DetailItem label="Job Type" value={employee.job_type || "—"} />
-              <DetailItem label="Employee Type" value={employee.employee_type || "—"} />
+              <DetailItem
+                label="Employee Type"
+                value={employee.employee_type || "—"}
+              />
             </div>
           </section>
 
@@ -87,9 +125,9 @@ export default function PersonalDetails() {
           <section>
             <SectionDetailsHeader title="Disability Status" icon={Heart} />
             <div className="grid grid-cols-3 gap-8">
-              <DetailItem 
-                label="Has Disability" 
-                value={employee.has_disability ? "Yes" : "No"} 
+              <DetailItem
+                label="Has Disability"
+                value={employee.has_disability ? "Yes" : "No"}
               />
             </div>
           </section>
@@ -98,25 +136,75 @@ export default function PersonalDetails() {
           <section>
             <SectionDetailsHeader title="Salary Information" icon={Globe} />
             <div className="grid grid-cols-3 gap-8">
-              <DetailItem 
-                label="Basic Salary" 
-                value={employee.salary ? `KES ${employee.salary.toLocaleString()}` : "—"} 
+              <DetailItem
+                label="Basic Salary"
+                value={
+                  employee.salary
+                    ? `KES ${employee.salary.toLocaleString()}`
+                    : "—"
+                }
               />
-              <DetailItem label="Pays PAYE" value={employee.pays_paye ? "Yes" : "No"} />
-              <DetailItem label="Pays NSSF" value={employee.pays_nssf ? "Yes" : "No"} />
-              <DetailItem label="Pays SHIF" value={employee.pays_shif ? "Yes" : "No"} />
-              <DetailItem label="Pays Housing Levy" value={employee.pays_housing_levy ? "Yes" : "No"} />
+              <DetailItem
+                label="Pays PAYE"
+                value={employee.pays_paye ? "Yes" : "No"}
+              />
+              <DetailItem
+                label="Pays NSSF"
+                value={employee.pays_nssf ? "Yes" : "No"}
+              />
+              <DetailItem
+                label="Pays SHIF"
+                value={employee.pays_shif ? "Yes" : "No"}
+              />
+              <DetailItem
+                label="Pays Housing Levy"
+                value={employee.pays_housing_levy ? "Yes" : "No"}
+              />
             </div>
           </section>
         </div>
-        <EditButton />
+        <Button
+          onClick={() => setIsEditDialogOpen(true)}
+          className="flex bg-transparent items-center cursor-pointer gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-all shadow-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-pencil"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+          </svg>
+          Edit
+        </Button>
       </div>
+      <EditPersonalDetailsDialog
+        employee={employee}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onRefresh={refetch}
+      />
     </div>
   );
 }
 
 // Helper component for crisp data display
-function DetailItem({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function DetailItem({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
     <div className="group p-3 hover:bg-slate-50 rounded-lg transition-colors">
       <div className="flex items-center gap-2 mb-1">
