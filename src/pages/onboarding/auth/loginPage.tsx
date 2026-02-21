@@ -51,8 +51,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <Card className="w-full max-w-sm p-6">
+    <div className="flex items-center justify-center h-screen bg-slate-50">
+      <Card className="w-full max-w-sm p-6 rounded-sm shadow-none border border-slate-300">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
@@ -68,6 +68,7 @@ const LoginPage = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="rounded-sm shadow-none border border-slate-200"
                 placeholder="m@example.com"
               />
             </div>
@@ -78,6 +79,7 @@ const LoginPage = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
+                  className="rounded-sm shadow-none border border-slate-200"
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
@@ -92,7 +94,7 @@ const LoginPage = () => {
             </div>
             <Button
               type="submit"
-              className="w-full cursor-pointer bg-[#1F3A8A] hover:bg-[#1F3A7D]"
+              className="w-full cursor-pointer bg-[#1F3A8A] hover:bg-[#1F3A7D] rounded-sm shadow-none"
               disabled={loading}
             >
               {loading ? (
