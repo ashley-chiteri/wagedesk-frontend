@@ -27,50 +27,60 @@ import confetti from "canvas-confetti";
 import { OtherDeductionsTable } from "./DeductionsTable";
 import { AllowanceTable } from "./BenefitsTable";
 
-function StatutoryDeductions(){
-
-    const statutoryDeductions = [
+function StatutoryDeductions() {
+  const statutoryDeductions = [
     { name: "PAYE", type: "Formula", value: "Custom" },
     { name: "NSSF", type: "New Rates (Tier I & II)", value: "Custom" },
     { name: "SHIF", type: "Formula", value: "Custom" },
     { name: "Housing Levy", type: "Formula", value: "Custom" },
   ];
-    return(
-        <div className="space-y-6">              
-              <div className="border border-slate-200 rounded-md overflow-hidden">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-3 font-semibold text-slate-900">Name</th>
-                      <th className="px-6 py-3 font-semibold text-slate-900">Assigned As</th>
-                      <th className="px-6 py-3 font-semibold text-slate-900">Type</th>
-                      <th className="px-6 py-3 font-semibold text-slate-900">Value</th>
-                      <th className="px-6 py-3 font-semibold text-slate-900">Frequency</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {statutoryDeductions.map((item) => (
-                      <tr key={item.name} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-slate-700">{item.name}</td>
-                        <td className="px-6 py-4 text-slate-500 underline decoration-dotted">Default</td>
-                        <td className="px-6 py-4 text-slate-500">{item.type}</td>
-                        <td className="px-6 py-4 text-slate-500">{item.value}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-700">
-                            Every payroll cycle
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-    )
+  return (
+    <div className="space-y-6">
+      <div className="border border-slate-200 rounded-md overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-3 font-semibold text-slate-900">Name</th>
+              <th className="px-6 py-3 font-semibold text-slate-900">
+                Assigned As
+              </th>
+              <th className="px-6 py-3 font-semibold text-slate-900">Type</th>
+              <th className="px-6 py-3 font-semibold text-slate-900">Value</th>
+              <th className="px-6 py-3 font-semibold text-slate-900">
+                Frequency
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {statutoryDeductions.map((item) => (
+              <tr
+                key={item.name}
+                className="hover:bg-slate-50 transition-colors"
+              >
+                <td className="px-6 py-4 font-medium text-slate-700">
+                  {item.name}
+                </td>
+                <td className="px-6 py-4 text-slate-500 underline decoration-dotted">
+                  Default
+                </td>
+                <td className="px-6 py-4 text-slate-500">{item.type}</td>
+                <td className="px-6 py-4 text-slate-500">{item.value}</td>
+                <td className="px-6 py-4">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-700">
+                    Every payroll cycle
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 function ReviewersTable() {
-    const fullName = useAuthStore.getState().activeWorkspace?.full_names || "";
+  const fullName = useAuthStore.getState().activeWorkspace?.full_names || "";
   return (
     <div className="space-y-6">
       <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -110,7 +120,7 @@ export default function PayrollSetup() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const navigate = useNavigate();
-   const { companyId } = useParams<{companyId: string;}>();
+  const { companyId } = useParams<{ companyId: string }>();
 
   const totalSteps = 4;
 
@@ -131,13 +141,21 @@ export default function PayrollSetup() {
     }
   }, [done]);
 
+  const handleFinish = async () => {
+    // Trigger a refresh of the workspace context to show the new company on the dashboard
+    await useAuthStore.getState().loadContext();
+    navigate("/dashboard");
+  };
+
   return (
     <div className="max-w-6xl mx-auto py-12 px-6">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
         {/* Sidebar Stepper - Sticky */}
         <div className="md:col-span-4 lg:col-span-3 sticky top-12 space-y-8">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Payroll Setup Guide</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Payroll Setup Guide
+            </h2>
             <p className="text-sm text-muted-foreground mt-1">
               Configure your payroll items
             </p>
@@ -187,8 +205,12 @@ export default function PayrollSetup() {
               {/* Dynamic Form Content */}
               <div className="min-h-75">
                 {step === 1 && <StatutoryDeductions />}
-                {step === 2 && <OtherDeductionsTable companyId={companyId as string} />}
-                {step === 3 && <AllowanceTable companyId={companyId as string} />}
+                {step === 2 && (
+                  <OtherDeductionsTable companyId={companyId as string} />
+                )}
+                {step === 3 && (
+                  <AllowanceTable companyId={companyId as string} />
+                )}
                 {step === 4 && <ReviewersTable />}
               </div>
 
@@ -225,27 +247,32 @@ export default function PayrollSetup() {
             </div>
             <DialogHeader>
               <DialogTitle className="text-center text-3xl font-bold text-slate-900 tracking-tight">
-                Payroll setup complete
+                Payroll Setup Complete!
               </DialogTitle>
             </DialogHeader>
 
-            <p className="mt-4 text-slate-500 text-base leading-relaxed max-w-sm mx-auto">
-              Your payroll configuration has been successfully initialized. You
-              can now onboard employees and start running payroll cycles.
-            </p>
+            <div className="mt-6 space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p className="text-amber-800 text-sm font-medium mb-1">
+                  ⏳ Pending Approval
+                </p>
+                <p className="text-amber-700 text-sm">
+                  Your company is now under review. Our team will verify your
+                  details and approve your account shortly.
+                </p>
+              </div>
 
-            <div className="mt-12 space-y-4">
-              <Button
-                className="w-full bg-[#1F3A8A] hover:bg-[#162a63] h-14 cursor-pointer rounded-lg text-base font-semibold shadow-md transition-all hover:-translate-y-px"
-                onClick={() => navigate(`/company/${companyId}/employees`)}
-              >
-                Onboard Employees
-              </Button>
+              <p className="text-slate-500 text-base leading-relaxed">
+                Once approved, you'll be able to onboard employees and start
+                running payroll cycles. You'll receive an email notification
+                when your account is activated.
+              </p>
+            </div>
 
+            <div className="mt-10">
               <Button
-                variant="ghost"
-                className="w-full h-12 rounded-lg text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
-                onClick={() => navigate("/dashboard")}
+                className="w-full bg-[#1F3A8A] hover:bg-[#162a63] h-14 rounded-lg text-base font-semibold shadow-md transition-all hover:-translate-y-px"
+                onClick={handleFinish}
               >
                 Back to Dashboard
               </Button>
