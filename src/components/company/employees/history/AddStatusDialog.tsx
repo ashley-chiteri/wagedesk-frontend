@@ -24,7 +24,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Employee } from "@/types/employees";
 
-const STATUS_OPTIONS = ["ACTIVE", "On Leave", "Terminated", "Suspended"];
+const STATUS_OPTIONS = ["ACTIVE", "ON LEAVE", "TERMINATED", "SUSPENDED"];
 
 interface AddStatusDialogProps {
   employee: Employee;

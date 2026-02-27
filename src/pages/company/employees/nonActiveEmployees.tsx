@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import EmployeeTableWrapper from "@/components/company/employees/EmployeeTableWrapper";
 import { EmployeeStatus } from "@/types/employees";
 
-const NON_ACTIVE_STATUSES: EmployeeStatus[] = ["On Leave", "Suspended"];
+const NON_ACTIVE_STATUSES: EmployeeStatus[] = ["ON LEAVE", "SUSPENDED"];
 
 export default function NonActiveEmployees() {
   return (

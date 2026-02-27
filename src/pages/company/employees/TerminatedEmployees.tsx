@@ -7,7 +7,7 @@ export default function TerminatedEmployees() {
     <Card className="shadow-none rounded-none border-none">
       <CardContent className="pt-6">
         <EmployeeTableWrapper 
-          statusFilter="Terminated"
+          statusFilter="TERMINATED"
         />
       </CardContent>
     </Card>
