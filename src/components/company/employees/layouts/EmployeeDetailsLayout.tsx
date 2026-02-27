@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, History} from "lucide-react";
 import { useEmployee } from "@/hooks/useEmployee";
 
 const toProperCase = (str: string) => {
@@ -22,7 +22,10 @@ export default function EmployeeDetailsLayout() {
     employeeId: string;
   }>();
   const navigate = useNavigate();
-  const { employee, loading, error, refetch } = useEmployee(companyId!, employeeId!);
+  const { employee, loading, error, refetch } = useEmployee(
+    companyId!,
+    employeeId!,
+  );
 
   const getInitials = () => {
     if (!employee) return "";
@@ -67,6 +70,10 @@ export default function EmployeeDetailsLayout() {
     {
       label: "Payments",
       href: `/company/${companyId}/employees/${employeeId}/payments`,
+    },
+    {
+      label: "History", // New tab
+      href: `/company/${companyId}/employees/${employeeId}/history`,
     },
     {
       label: "Deductions",
@@ -151,6 +158,22 @@ export default function EmployeeDetailsLayout() {
               )}
 
               {getStatusBadge()}
+
+              {employee && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  onClick={() =>
+                    navigate(
+                      `/company/${companyId}/employees/${employeeId}/history`,
+                    )
+                  }
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  View History
+                </Button>
+              )}
 
               {employee.departments && (
                 <div className="mt-6 w-full pt-4 border-t border-slate-100">

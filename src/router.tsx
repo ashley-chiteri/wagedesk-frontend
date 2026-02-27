@@ -13,8 +13,12 @@ import ModuleLayout from "./pages/company/layout/moduleLayout.tsx";
 import EmployeeSection from "./pages/company/employees/employeeSection.tsx";
 import AddEmployees from "./pages/company/employees/AddEmployee.tsx";
 import EmployeeDetailsLayout from "./components/company/employees/layouts/EmployeeDetailsLayout.tsx";
+import EmployeeLayout from "./components/company/employees/layouts/employeeLayout.tsx";
+import NonActiveEmployees from "./pages/company/employees/nonActiveEmployees.tsx";
+import TerminatedEmployees from "./pages/company/employees/TerminatedEmployees.tsx";
 import EmployeeDeductions from "./pages/company/employees/details/Deductions.tsx";
 import PaymentDetails from "./pages/company/employees/details/Payments.tsx";
+import EmployeeHistoryPage from "./pages/company/employees/details/History.tsx";
 import PersonalDetails from "./pages/company/employees/details/PersonalDetails.tsx";
 import ContractDetails from "./pages/company/employees/details/Contracts.tsx";
 import EmployeeAllowances from "./pages/company/employees/details/Allowances.tsx";
@@ -46,6 +50,7 @@ import HRMSettingsLayout from "./pages/company/settings/HRMLayout.tsx";
 import JobTitlesSettings from "./pages/company/settings/JobTitles.tsx";
 import DepartmentSettings from "./pages/company/settings/Departments.tsx";
 import ProfileSettings from "./pages/company/settings/ProfilesSettings.tsx";
+import AuditLogs from "./pages/company/settings/AuditLogs.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const ProtectedRoute = () => {
@@ -101,7 +106,12 @@ const AppRouterWrapper = () => {
           <Route path="/company/:companyId" element={<ModuleLayout />}>
             <Route index element={<Navigate to="modules" replace />} />
             <Route path="modules" element={<ModuleDashboard />} />
-            <Route path="employees" element={<EmployeeSection />} />
+            <Route element={<EmployeeLayout />}>
+             <Route index element={<EmployeeSection />} />
+              <Route path="employees" element={<EmployeeSection />} />
+              <Route path="employees/non-active" element={<NonActiveEmployees />} />
+              <Route path="employees/terminated" element={<TerminatedEmployees />} />
+            </Route>
             <Route path="employees/add-employee" element={<AddEmployees />} />
             {/* Employee details */}
             <Route
@@ -114,6 +124,7 @@ const AppRouterWrapper = () => {
               <Route path="payments" element={<PaymentDetails />} />
               <Route path="deductions" element={<EmployeeDeductions />} />
               <Route path="allowances" element={<EmployeeAllowances />} />
+              <Route path="history" element={<EmployeeHistoryPage />} />
             </Route>
             {/**Payroll specific dashboards */}
 
@@ -127,7 +138,7 @@ const AppRouterWrapper = () => {
                 <Route path="overview" element={<BenefitSettings />} />
               </Route>
               <Route path="deductions" element={<DeductionLayout />}>
-                 <Route index element={<Navigate to="overview" replace />} />
+                <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<DeductionSettings />} />
                 <Route path="helb" element={<HELBSection />} />
               </Route>
@@ -159,6 +170,7 @@ const AppRouterWrapper = () => {
                 <Route path="departments" element={<DepartmentSettings />} />
                 <Route path="Job-titles" element={<JobTitlesSettings />} />
               </Route>
+              <Route path="logs" element={<AuditLogs />} />
             </Route>
             {/* Catch all for undefined routes under /company/:companyId */}
             <Route path="*" element={<NotFound />} />
