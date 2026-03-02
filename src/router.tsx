@@ -1,7 +1,7 @@
 import { HashRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
-import SplashScreen from "./pages/onboarding/splashScreen";
+import SplashScreen from "./pages/onboarding/splashScreen.tsx";
 import LoginPage from "./pages/onboarding/auth/loginPage.tsx";
 import RootDashboard from "./pages/dashboard/rootDashboard.tsx";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
@@ -29,6 +29,7 @@ import BenefitSettings from "./pages/company/payroll/benefits/benefitSection.tsx
 import BenefitLayout from "./pages/company/payroll/benefits/benefitsLayout.tsx";
 import DeductionLayout from "./pages/company/payroll/deductions/deductionsLayout.tsx";
 import AssignBenefits from "./pages/company/payroll/benefits/assignBenefits.tsx";
+import AbsentDaysPage from "./pages/company/payroll/benefits/absentDays.tsx";
 import AssignDeductions from "./pages/company/payroll/deductions/assignDeductions.tsx";
 import PayrollSettingsLayout from "./pages/company/payroll/settings/PayrollSettingsLayout.tsx";
 import PayrollWizard from "./components/payroll/runs/PayrollWizard.tsx";
@@ -136,6 +137,7 @@ const AppRouterWrapper = () => {
               <Route path="benefits" element={<BenefitLayout />}>
                 <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<BenefitSettings />} />
+                <Route path="absent-days" element={<AbsentDaysPage />} />
               </Route>
               <Route path="deductions" element={<DeductionLayout />}>
                 <Route index element={<Navigate to="overview" replace />} />

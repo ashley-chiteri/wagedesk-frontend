@@ -1,4 +1,5 @@
 // src/components/company/payroll/allowances/ImportAllowanceDialog.tsx
+
 import React, { useState, useCallback } from "react";
 import {
   Dialog,
@@ -13,7 +14,6 @@ import { toast } from "sonner";
 import { API_BASE_URL } from "@/config";
 import { useAuthStore } from "@/stores/authStore";
 import { Loader2, Download, CheckCircle, CloudUpload } from "lucide-react";
-//import { useParams } from "react-router-dom";
 import axios from "axios";
 
 interface ImportAllowanceDialogProps {
@@ -29,7 +29,6 @@ const ImportAllowanceDialog: React.FC<ImportAllowanceDialogProps> = ({
   onUpdated,
   companyId,
 }) => {
-  //const { companyId } = useParams();
   const { session } = useAuthStore();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -114,17 +113,16 @@ const ImportAllowanceDialog: React.FC<ImportAllowanceDialogProps> = ({
       );
 
       toast.success(response.data.message);
-      onUpdated(); // Refresh the list of allowances after a successful import
+      onUpdated();
       onClose();
     } catch (error) {
       console.error("Upload error:", error);
       if (axios.isAxiosError(error) && error.response) {
         toast.error(error.response.data.error || "Failed to import allowances.");
         if (error.response.data.details) {
-            error.response.data.details.forEach((detail: string) => {
-                toast.error(detail);
-                console.error(detail);
-            });
+          error.response.data.details.forEach((detail: string) => {
+            toast.error(detail);
+          });
         }
       } else {
         toast.error("Failed to import allowances. Please try again.");
@@ -141,7 +139,7 @@ const ImportAllowanceDialog: React.FC<ImportAllowanceDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Bulk Import Allowances</DialogTitle>
           <DialogDescription>
-            Download the template, fill it with employee allowance data, and then upload it.
+            Download the template, fill it with employee allowance data (using months and years), and then upload it.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -151,7 +149,7 @@ const ImportAllowanceDialog: React.FC<ImportAllowanceDialogProps> = ({
               onClick={handleDownloadTemplate}
               className="flex items-center cursor-pointer gap-2"
             >
-              <Download className="h-4 w-4 " /> Download Template
+              <Download className="h-4 w-4" /> Download Template
             </Button>
           </div>
           <div className="grid gap-2">

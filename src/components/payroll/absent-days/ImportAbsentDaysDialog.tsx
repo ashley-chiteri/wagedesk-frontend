@@ -1,5 +1,3 @@
-// src/components/company/payroll/deductions/ImportDeductionDialog.tsx
-
 import React, { useState, useCallback } from "react";
 import {
   Dialog,
@@ -14,21 +12,21 @@ import { toast } from "sonner";
 import { API_BASE_URL } from "@/config";
 import { useAuthStore } from "@/stores/authStore";
 import { Loader2, Download, CheckCircle, CloudUpload } from "lucide-react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 
-interface ImportDeductionDialogProps {
+interface ImportAbsentDaysDialogProps {
+  companyId: string;
   isOpen: boolean;
   onClose: () => void;
   onUpdated: () => void;
 }
 
-const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
+const ImportAbsentDaysDialog: React.FC<ImportAbsentDaysDialogProps> = ({
   isOpen,
   onClose,
-  onUpdated
+  onUpdated,
+  companyId,
 }) => {
-  const { companyId } = useParams();
   const { session } = useAuthStore();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -61,7 +59,7 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
       
       toast.info("Downloading template...");
       const response = await axios.get(
-        `${API_BASE_URL}/company/${companyId}/deductions/template`,
+        `${API_BASE_URL}/company/${companyId}/absent-days/template`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +71,7 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "Deduction_Import_Template.xlsx");
+      link.setAttribute("download", "Absent_Days_Import_Template.xlsx");
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -102,7 +100,7 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
       }
 
       const response = await axios.post(
-        `${API_BASE_URL}/company/${companyId}/deductions/import`,
+        `${API_BASE_URL}/company/${companyId}/absent-days/import`,
         formData,
         {
           headers: {
@@ -118,14 +116,15 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
     } catch (error) {
       console.error("Upload error:", error);
       if (axios.isAxiosError(error) && error.response) {
-        toast.error(error.response.data.error || "Failed to import deductions.");
+        toast.error(error.response.data.error || "Failed to import absent days.");
         if (error.response.data.details) {
           error.response.data.details.forEach((detail: string) => {
             toast.error(detail);
+            console.error(detail);
           });
         }
       } else {
-        toast.error("Failed to import deductions. Please try again.");
+        toast.error("Failed to import absent days. Please try again.");
       }
     } finally {
       setIsUploading(false);
@@ -135,11 +134,11 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-106.25">
+      <DialogContent className="sm:max-w-100.25">
         <DialogHeader>
-          <DialogTitle>Import Deductions (Month/Year Based)</DialogTitle>
+          <DialogTitle>Bulk Import Absent Days</DialogTitle>
           <DialogDescription>
-            Download the template, fill it with deduction details including the **Start Month/Year** and **Is Recurring** status, and upload the file.
+            Download the template, fill it with employee absent days data, and then upload it.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -194,4 +193,4 @@ const ImportDeductionDialog: React.FC<ImportDeductionDialogProps> = ({
   );
 };
 
-export default ImportDeductionDialog;
+export default ImportAbsentDaysDialog;
