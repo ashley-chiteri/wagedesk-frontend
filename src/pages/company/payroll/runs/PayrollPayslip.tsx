@@ -307,7 +307,7 @@ export default function PayrollPayslipTable() {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="p-4 space-y-4">
       {/* 2. SHOW BULK BUTTON CONDITIONALLY */}
       <div className="flex justify-between items-center px-1">
         <h2 className="text-lg font-semibold text-slate-900">
