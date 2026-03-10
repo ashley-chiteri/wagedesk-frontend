@@ -1,6 +1,6 @@
 // src/pages/onboarding/auth/LoginPage.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,6 +92,14 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
+            <div className="text-right text-sm mt-2">
+            <Link
+              to="/forgot-password"
+              className="text-[#1F3A8A] hover:text-blue-600 hover:underline focus:outline-none"
+            >
+              Forgot Password?
+            </Link>
+          </div>
             <Button
               type="submit"
               className="w-full cursor-pointer bg-[#1F3A8A] hover:bg-[#1F3A7D] rounded-sm shadow-none"
